@@ -5,7 +5,7 @@
  */
 public class ConnectionClient {
 	
-	CookshareConnectionService chessdb;
+	CookshareConnectionService db;
 	private final String dbName = "Cookshare";
 	private final String serverName = "titan.csse.rose-hulman.edu";
 
@@ -14,6 +14,6 @@ public class ConnectionClient {
 	}
 	
 	public ConnectionClient() {
-		chessdb = new CookshareConnectionService(serverName, dbName);
+		db = new CookshareConnectionService(serverName, dbName);
 	}
 }
