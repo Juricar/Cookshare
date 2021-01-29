@@ -213,47 +213,6 @@ public class CookshareConnectionService {
 		}
 		closeConnection();
 	}
-	/**
-	 * The frame for inserting/updating
-	 */
-	private void openInputFrame() {
-		if(this.inputFrame != null) {
-			return;
-		}
-		if(this.isGuest) {
-			System.out.println("User is guest. Cannot input or update.");
-			JOptionPane.showMessageDialog(null, "User is guest. Cannot input or update.");
-			return;
-		}
-		JFrame frame = new JFrame("Cookshare Query Window");
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setSize(new Dimension(1250, 350));
-		createMenuBar(frame);
-		JPanel panel = new JPanel(new BorderLayout());
-		frame.add(panel);
-		if (this.useFrame != null) {
-			this.useFrame.dispose();
-			this.useFrame = null;
-		}
-		
-		JPanel topPanel = new JPanel();
-		
-		JLabel tableText = new JLabel("Table to Insert Into/Update:");
-		
-		JRadioButton isUpdate = new JRadioButton("Update");
-		this.isUpdate = isUpdate;
-		
-		topPanel.add(tableText);
-		topPanel.add(isUpdate);
-		panel.add(topPanel, BorderLayout.NORTH);
-		
-		JPanel centerPanel = new JPanel();
-		this.inputPanel = centerPanel;
-		panel.add(centerPanel, BorderLayout.CENTER);
-		
-		this.inputFrame = frame;
-		frame.setVisible(true);
-	}
 	
 	/**
 	 * The menu bar (for swapping between insert/update and selection)
@@ -266,13 +225,8 @@ public class CookshareConnectionService {
 		JMenuItem search = new JMenuItem("Search");
 		search.setToolTipText("Search through the Database");
 		search.addActionListener((event) -> openUseFrame());
-		
-		JMenuItem insert = new JMenuItem("Insert/Update");
-		insert.setToolTipText("Input data into the Database");
-		insert.addActionListener((event) -> openInputFrame());
-		
+				
 		menu.add(search);
-		//menu.add(insert);
 		
 		menuBar.add(menu);
 		
@@ -436,129 +390,7 @@ public class CookshareConnectionService {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			/*CallableStatement ps;
-			if(constraintMenu.getSelectedIndex() == 0) {
-//				System.out.println("Please select a search option to use search functionality");
-				JOptionPane.showMessageDialog(null, "Please select a search option to use search functionality");
-				return;
-			}
-			try { //This part goes and executes the query we want executed.
-				//String query = "SELECT ";
-				//query = query+ searchCols[constraintMenu.getSelectedIndex() -1]+ " FROM " + searchTables[constraintMenu.getSelectedIndex() -1] + " WHERE " + searchWheres[constraintMenu.getSelectedIndex() - 1] + " = ?";
-				String q2 = "{? = call " + searchLookup.get(constraintMenu.getSelectedItem().toString()) + "(?)}";
-				int errcode = 0;
-				//System.out.println(query);
-				ps = connection.prepareCall(q2);
-				System.out.println(q2);
-				ps.setString(2, searchBox.getText());
-				ps.registerOutParameter(1, errcode);
-				ps.execute();
-				ResultSet rs = ps.getResultSet();
-				System.out.println(0);
-				DefaultTableModel model = (DefaultTableModel) table.getModel();
-				model.setColumnCount(0);
-				model.setRowCount(0);
-				
-
-				ResultSetMetaData rsmd = rs.getMetaData();
-				ArrayList<String> names = new ArrayList<String>();
-				int columnCount = rsmd.getColumnCount();
-
-				
-				for(int i = 0; i < columnCount; i++) {
-					names.add(rsmd.getColumnName(i+1));
-					model.addColumn(rsmd.getColumnName(i+1));
-				}
-				
-				while(rs.next()) {
-					Object[] data = new Object[names.size()];
-					for(int j = 0; j < names.size(); j++) {
-						data[j] = rs.getString(j+1);
-					}
-					model.addRow(data);
-				}
-				
-				
-			} catch (SQLException e) {
-				JOptionPane.showMessageDialog(null, "Invalid Search Term");
-			}
-			
-			
-		}*/
 		
 	}
-	
-	/**
-	 * When someone switches what table they are viewing, this listener activates, and updates the table
-	 * displayed.
-	 * @author juricar
-	 *
-	 */
-	/*private class TableSwitchListener implements ActionListener{
-
-		@Override
-		public void actionPerformed(ActionEvent arg0) {
-			//Statement s;
-			//Object selected = selectionMenu.getSelectedItem();
-			//String query = "SELECT * FROM "+ selected.toString();
-			String query = "EXEC " + procLookupTables.get(selectionMenu.getSelectedItem());
-			PreparedStatement ps;
-			try {
-				//s = connection.createStatement();
-				ps = connection.prepareStatement(query);
-				ResultSet rs = ps.executeQuery();
-				ResultSetMetaData rsmd = rs.getMetaData();
-				ArrayList<String> names = new ArrayList<String>();
-				int columnCount = rsmd.getColumnCount();
-				numFields = columnCount;
-			
-				DefaultTableModel model = (DefaultTableModel) table.getModel();
-				model.setColumnCount(0);
-				model.setRowCount(0);
-				for(int i = 0; i < columnCount; i++) {
-					names.add(rsmd.getColumnName(i+1));
-					model.addColumn(rsmd.getColumnName(i+1));
-				}
-				fieldNames = names;
-				
-				int i = 0;
-				while(rs.next()) {
-					i++;
-					Object[] data = new Object[names.size()];
-					for(int j = 0; j < names.size(); j++) {
-						data[j] = rs.getString(j+1);
-					}
-					model.addRow(data);
-				}
-				if (inputPanel != null) {
-					inputPanel.removeAll();
-					ArrayList<JTextField> texts = new ArrayList<JTextField>();
-					for (int k = 0; k < numFields; k++) {
-						JTextField text = new JTextField(10);
-						text.setText(fieldNames.get(k));
-						texts.add(text);
-						inputPanel.add(text);
-					}
-					try {
-						inputs = texts;
-						inputPanel.revalidate();
-						inputPanel.repaint();
-						//inputFrame.repaint();
-					}
-					catch(Exception e){
-						System.out.println("FFF");
-					}
-				}
-				
-				
-				//System.out.println(names);
-			} catch (SQLException e) {
-
-				JOptionPane.showMessageDialog(null, "Table Switch Failed");
-			}
-			
-			//System.out.println(query);
-		}
-	*/	
 	}
 }
