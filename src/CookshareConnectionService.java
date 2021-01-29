@@ -51,19 +51,13 @@ public class CookshareConnectionService {
 	private JTable table;
 	private JComboBox selectionMenu;
 	private JComboBox constraintMenu;
+	JScrollPane scrollPane;
 	private int numFields;
 	private ArrayList<String> fieldNames;
 	private JPanel inputPanel;
 	private ArrayList<JTextField> inputs;
 	private JRadioButton isUpdate;
-	private String[] tableNames = {"Judges", "People", "Players", "Tournaments", "Match Hosts", "Matches", "Competes In"};
-	private String[] tableInsertNames = {"Judges", "People", "Players", "Tournaments", "Match Hosts", "Matches", "Competes In"};
-	private String[] searchOptions = {"None", "ELO Search", "Player Search By Username", "Person Search By Username", "Judge Search By Username", "Full Name Search", "Tournament Name Search","Player Match Search", "Player Win Search", "Player Loss Search", "Moves By Match ID Search", "Match ID Search","Total Player Wins By Username","Total Player Losses By Username", "Tournaments a player has competed in"};
-	//private String[] searchTables = {"Player", "Person", "Tournament", "PlayerMatchHistory", "PlayerWinHistory", "PlayerLossHistory", "MatchMoves"};
-	//private String[] searchWheres = {"ELO", "FullName", "TournamentName", "Username", "Username", "Username", "MatchID"};
-	//private String[] searchCols = {"Username, ELO, IsComp", "Username, FullName, JoinDate", "*", "*", "*", "Turn, MoveCode"};
-	private HashMap<String,String> procLookupTables;
-	private HashMap<String,String> searchLookup;
+	private String[] tableNames = {"Cuisine", "BelongsTo", "Dish", "Has", "Ingredients", "Recipe", "Reviews", "Steps", "User", "Uses", "Utensils"};
 	private JButton searchButton;
 	private boolean isGuest;
 	
@@ -79,18 +73,6 @@ public class CookshareConnectionService {
 		this.databaseName = databaseName;
 		this.loginFrame = makeLoginDialog();
 		this.isGuest = true;
-		initHashMaps();
-	}
-	
-	private void initHashMaps(){
-		this.procLookupTables = new HashMap<String,String>();
-		procLookupTables.put("Judges", "GetJudgeList");
-		procLookupTables.put("People", "GetPersonList");
-		procLookupTables.put("Players", "GetPlayerList");
-		procLookupTables.put("Tournaments", "GetTournamentList");
-		procLookupTables.put("Match Hosts", "GetMatchHostList");
-		procLookupTables.put("Matches", "GetMatchList");
-		procLookupTables.put("Competes In", "GetCompetesInList");
 	}
 	
 	/**
@@ -203,7 +185,7 @@ public class CookshareConnectionService {
 				
 				//System.out.println(rs.getString("Username") + " : " + rs.getString("Pswd") + " : " +rs.getString("FullName") + " : " +rs.getString("JoinDate"));
 			}*/
-			JScrollPane scrollPane = new JScrollPane(table);
+			scrollPane = new JScrollPane(table);
 			
 			this.table = table;
 			table.setDefaultEditor(Object.class, null);
@@ -211,23 +193,13 @@ public class CookshareConnectionService {
 			
 			JComboBox tableList = new JComboBox(tableNames);
 			tableList.setSelectedIndex(1);
-			tableList.addActionListener(new TableSwitchListener());
 			this.selectionMenu = tableList;
-			
-			JComboBox constraintList = new JComboBox(searchOptions);
-			constraintList.setSelectedIndex(0);
-			this.constraintMenu = constraintList;
-			
-			JTextField entryBox = new JTextField(50);
-			this.searchBox = entryBox;
 			
 			JButton searchButton = new JButton("Search");
 			searchButton.addActionListener(new SearchButtonListener());
 			this.searchButton = searchButton;
 			
 			topPanel.add(tableList, BorderLayout.WEST);
-			topPanel.add(constraintList,BorderLayout.CENTER);
-			topPanel.add(entryBox, BorderLayout.EAST);
 			topPanel.add(searchButton, BorderLayout.EAST);
 			panel.add(scrollPane, BorderLayout.CENTER);
 			frame.pack();
@@ -268,28 +240,16 @@ public class CookshareConnectionService {
 		
 		JLabel tableText = new JLabel("Table to Insert Into/Update:");
 		
-		JComboBox tableChoice = new JComboBox(tableInsertNames);
-		tableChoice.setSelectedIndex(-1);
-		tableChoice.addActionListener(new TableSwitchListener());
-		this.selectionMenu = tableChoice;
-		
 		JRadioButton isUpdate = new JRadioButton("Update");
 		this.isUpdate = isUpdate;
 		
 		topPanel.add(tableText);
-		topPanel.add(tableChoice);
 		topPanel.add(isUpdate);
 		panel.add(topPanel, BorderLayout.NORTH);
 		
 		JPanel centerPanel = new JPanel();
 		this.inputPanel = centerPanel;
 		panel.add(centerPanel, BorderLayout.CENTER);
-		
-		JPanel bottomPanel = new JPanel();
-		JButton insertButton = new JButton("Insert into/Update Table");
-		insertButton.addActionListener(new InsertButtonListener());
-		bottomPanel.add(insertButton);
-		panel.add(bottomPanel, BorderLayout.SOUTH);
 		
 		this.inputFrame = frame;
 		frame.setVisible(true);
@@ -312,7 +272,7 @@ public class CookshareConnectionService {
 		insert.addActionListener((event) -> openInputFrame());
 		
 		menu.add(search);
-		menu.add(insert);
+		//menu.add(insert);
 		
 		menuBar.add(menu);
 		
@@ -437,8 +397,46 @@ public class CookshareConnectionService {
 		@Override
 		public void actionPerformed(ActionEvent arg0) {
 			
+			String query = "SELECT * FROM ";
+			try {
+				query += String.valueOf(selectionMenu.getSelectedItem());
+				CallableStatement cs = getConnection().prepareCall(query);
+				cs.execute();
+				ResultSet rs = cs.getResultSet();
+				ResultSetMetaData rsmd = rs.getMetaData();
+				//System.out.println("Made Query");
+				
+				JTable table = new JTable(new DefaultTableModel());
+				ArrayList<String> names = new ArrayList<String>();
+				int columnCount = rsmd.getColumnCount();
+				numFields = columnCount;
 			
-			CallableStatement ps;
+				DefaultTableModel model = (DefaultTableModel) table.getModel();
+				model.setColumnCount(0);
+				model.setRowCount(0);
+				for(int i = 0; i < columnCount; i++) {
+					names.add(rsmd.getColumnName(i+1));
+					model.addColumn(rsmd.getColumnName(i+1));
+					
+				}
+				fieldNames = names;
+				
+				int i = 0;
+				while(rs.next()) {
+					i++;
+					Object[] data = new Object[names.size()];
+					for(int j = 0; j < names.size(); j++) {
+						data[j] = rs.getString(j+1);
+					}
+					model.addRow(data);
+				}
+				
+				scrollPane.getViewport ().add (table);
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			/*CallableStatement ps;
 			if(constraintMenu.getSelectedIndex() == 0) {
 //				System.out.println("Please select a search option to use search functionality");
 				JOptionPane.showMessageDialog(null, "Please select a search option to use search functionality");
@@ -486,7 +484,7 @@ public class CookshareConnectionService {
 			}
 			
 			
-		}
+		}*/
 		
 	}
 	
@@ -496,7 +494,7 @@ public class CookshareConnectionService {
 	 * @author juricar
 	 *
 	 */
-	private class TableSwitchListener implements ActionListener{
+	/*private class TableSwitchListener implements ActionListener{
 
 		@Override
 		public void actionPerformed(ActionEvent arg0) {
@@ -561,149 +559,6 @@ public class CookshareConnectionService {
 			
 			//System.out.println(query);
 		}
-		
-	}
-	
-	/**
-	 * This listener handles the actual insertion and updating process of calling stored procedures.
-	 * @author juricar
-	 *
-	 */
-	private class InsertButtonListener implements ActionListener{
-
-		@Override
-		public void actionPerformed(ActionEvent arg0) {
-			
-			String selected = (String) selectionMenu.getSelectedItem();
-			String sprocName = "";
-			String args = "";
-			String action = "Insert";
-			boolean update = isUpdate.isSelected();
-			if (update) {
-				action = "Update";
-			}
-			
-			switch(selected) {
-			case "Judges":
-				sprocName = "Judge";
-				args = "(?, ?)";
-				break;
-			case "People":
-				sprocName = "Person";
-				args = "(?, ?, ?, ?)";
-				break;
-			case "Players":
-				sprocName = "Player";
-				args = "(?, ?, ?)";
-				break;
-			case "Tournaments":
-				sprocName = "Tournament";
-				args = "(?, ?, ?, ?, ?)";
-				break;
-			case "Match Hosts":
-				sprocName = "MatchHost";
-				args = "(?, ?)";
-				break;
-			case "Matches":
-				sprocName = "ChessMatch";
-				args = "(?, ?, ?, ?, ?, ?, ?, ?, ?)";
-				break;
-			case "Competes In":
-				sprocName = "CompetesIn";
-				args = "(?, ?)";
-				break;
-			}
-			
-			String query = "{? = call " + sprocName + action + args + "}";
-			CallableStatement cs;
-			try {
-				cs = connection.prepareCall(query);
-				cs.registerOutParameter(1, Types.INTEGER);
-				
-				switch(selected) {
-				case "Judges":
-					//args = "@Username = ?, @JudgeRank = ?";
-					cs.setString(2, inputs.get(0).getText());
-					cs.setString(3, inputs.get(1).getText());
-					break;
-				case "People":
-					//args = "@Username = ?, @Pswd = ?, @Fullname = ?, @Joindate = ?";
-					cs.setString(2, inputs.get(0).getText());
-					cs.setString(3, "HASH SALT");
-					cs.setString(4, inputs.get(1).getText());
-					cs.setString(5, inputs.get(2).getText());
-					break;
-				case "Players":
-					//args = "@Username = ?, @ELO = ?, @IsComp = ?";
-					cs.setString(2, inputs.get(0).getText());
-					cs.setInt(3, Integer.parseInt(inputs.get(1).getText()));
-					cs.setInt(4, Integer.parseInt(inputs.get(2).getText()));
-					break;
-				case "Tournaments":
-					//args = "@TournamentID = ?, @StartDate = ?, @EndDate = ?, @TournamentLocation = ?, @TournamentName = ?";
-					cs.setInt(2, 1);
-					cs.setString(3, inputs.get(1).getText());
-					cs.setString(4, inputs.get(2).getText());
-					cs.setString(5, inputs.get(3).getText());
-					cs.setString(6, inputs.get(0).getText());
-					System.out.println(inputs.get(0).getText() + " 1" + inputs.get(1).getText() + " 2" + inputs.get(2).getText());
-					break;
-				case "Match Hosts":
-					//args = "@OrgID = ?, @OrgName = ?";
-					cs.setInt(2, Integer.parseInt(inputs.get(0).getText()));
-					cs.setString(3, inputs.get(1).getText());
-					break;
-				case "Matches":
-					//args = "@MatchID = ?, @StartDate = ?, @EndDate = ?, @HostID = ?, @TournamentID = ?, @JudgeUsername = ?, @WinnerUsername = ?, @LoserUsername = ?, "
-					//		+ "@WasDraw = ?";
-					cs.setInt(2, Integer.parseInt(inputs.get(0).getText()));
-					cs.setString(3, inputs.get(1).getText());
-					cs.setString(4, inputs.get(2).getText());
-					cs.setInt(5, Integer.parseInt(inputs.get(3).getText()));
-					cs.setInt(6, Integer.parseInt(inputs.get(4).getText()));
-					cs.setString(7, inputs.get(5).getText());
-					cs.setString(8, inputs.get(6).getText());
-					cs.setString(9, inputs.get(7).getText());
-					cs.setInt(10, Integer.parseInt(inputs.get(8).getText()));
-					System.out.println(inputs.get(0).getText() + " 1 + "+ inputs.get(2).getText() + " 1 + "+ inputs.get(3).getText() + " 1 + "+ inputs.get(4).getText() + " 1 + " + inputs.get(5).getText() + " 1 + " + inputs.get(6).getText() +  " 1 + " + inputs.get(7).getText() + " 1 + "+inputs.get(8).getText());
-					break;
-				case "Competes In":
-					cs.setString(2, inputs.get(0).getText());
-					cs.setInt(3, Integer.parseInt(inputs.get(1).getText()));
-					break;
-				}
-				cs.execute();
-				if (cs.getInt(1) == 5) {
-					if (update) {
-						JOptionPane.showMessageDialog(null, "Something went wrong while updating. Person is invalid.");
-					} else {
-						JOptionPane.showMessageDialog(null, "Something went wrong while inserting. Person is invalid.");
-					}
-					
-				}
-				if (cs.getInt(1) == 10) {
-					if (update) {
-						JOptionPane.showMessageDialog(null, "Something went wrong while updating. Pehaps your parameters are invalid?");
-					} else {
-						JOptionPane.showMessageDialog(null, "Record already exists!");
-					}
-					
-				}
-				if (cs.getInt(1) == 0) {
-					if (update) {
-						JOptionPane.showMessageDialog(null, "Update Successful!");
-					} else {
-						JOptionPane.showMessageDialog(null, "Insert Successful!");
-					}
-					
-				}
-			} catch (SQLException e) {
-				if (update) {
-					JOptionPane.showMessageDialog(null, "Something went wrong while updating. Pehaps your parameters are invalid?");
-				} else {
-					JOptionPane.showMessageDialog(null, "Something went wrong while inserting. Pehaps your parameters are invalid?");
-				}
-			}
-		}
+	*/	
 	}
 }
