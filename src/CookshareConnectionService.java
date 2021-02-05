@@ -156,7 +156,7 @@ public class CookshareConnectionService {
 		try {
 //			String query = "EXEC "+this.procLookupTables.get(STARTINGTABLE); //The starting info, in there by default.
 //			PreparedStatement ps = connection.prepareStatement(query);
-			String query = "Select * From Recipe";
+			String query = "Exec searchRecipe";
 			Statement stmt = connection.createStatement();
 			ResultSet rs = stmt.executeQuery(query);
 			ResultSetMetaData rsmd = rs.getMetaData();
@@ -398,7 +398,11 @@ public class CookshareConnectionService {
 			
 			String query = "SELECT * FROM ";
 			try {
-				query += String.valueOf(selectionMenu.getSelectedItem());
+				query += "[" + String.valueOf(selectionMenu.getSelectedItem()) + "]";
+				
+				if (selectionMenu.getSelectedItem() == "Recipe") {
+					query = "Exec searchRecipe";
+				}
 				CallableStatement cs = getConnection().prepareCall(query);
 				cs.execute();
 				ResultSet rs = cs.getResultSet();
