@@ -2,6 +2,10 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.KeySpec;
 import java.sql.Array;
 import java.sql.CallableStatement;
 import java.sql.Connection;
@@ -13,6 +17,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.HashMap;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -31,6 +36,10 @@ import javax.swing.plaf.basic.BasicOptionPaneUI;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumnModel;
+import java.util.Random;
+
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
 /**
  * This method handles connection to the database, along with the GUI
  * @author juricar
@@ -59,9 +68,14 @@ public class CookshareConnectionService {
 	private JRadioButton isUpdate;
 	private String[] tableNames = {"Cuisine", "BelongsTo", "Dish", "Has", "Ingredients", "Recipe", "Reviews", "Steps", "User", "Uses", "Utensils"};
 	private JButton searchButton;
-	private boolean isGuest;
+	String user = "juricar";
+	String pass = "Atsknktvegef24035526LCA!";
 	
 	private final String STARTINGTABLE = "People";
+	
+	private static final Random RANDOM = new SecureRandom();
+	private static final Base64.Encoder enc = Base64.getEncoder();
+	private static final Base64.Decoder dec = Base64.getDecoder();
 	
 	/**
 	 * A basic constructor for our connection service.
@@ -71,8 +85,8 @@ public class CookshareConnectionService {
 	public CookshareConnectionService(String serverName, String databaseName) {
 		this.serverName = serverName;
 		this.databaseName = databaseName;
+		this.connect(user,pass);
 		this.loginFrame = makeLoginDialog();
-		this.isGuest = true;
 	}
 	
 	/**
@@ -173,18 +187,6 @@ public class CookshareConnectionService {
 				model.addRow(data);
 			}
 			
-			
-			
-			/*model.addColumn("Username"); 
-			model.addColumn("Full Name");
-			model.addColumn("Join Date");
-			while(rs.next()) {
-				i++;
-				
-				model.addRow(new Object[]{rs.getString("Username"), rs.getString("FullName"), rs.getString("JoinDate")});
-				
-				//System.out.println(rs.getString("Username") + " : " + rs.getString("Pswd") + " : " +rs.getString("FullName") + " : " +rs.getString("JoinDate"));
-			}*/
 			scrollPane = new JScrollPane(table);
 			
 			this.table = table;
@@ -249,15 +251,15 @@ public class CookshareConnectionService {
 		usernameEntry.setText("Username"); //default credentials
 		JTextField passwordEntry = new JTextField(25);
 		passwordEntry.setText("Password");
-		JButton connectButton = new JButton("Connect");
-		connectButton.addActionListener(new ConnectActionListener());
-		JButton connectGuestButton = new JButton("Connect As Guest");
-		connectGuestButton.addActionListener(new ConnectGuestActionListener());
+		JButton loginButton = new JButton("Login");
+		loginButton.addActionListener(new LoginActionListener());
+		JButton registerButton = new JButton("Register");
+		registerButton.addActionListener(new RegisterActionListener());
 		
 		panel.add(usernameEntry);
 		panel.add(passwordEntry);
-		panel.add(connectButton);
-		panel.add(connectGuestButton);
+		panel.add(loginButton);
+		panel.add(registerButton);
 		
 		this.userBox = usernameEntry;
 		this.passBox = passwordEntry;
@@ -267,23 +269,70 @@ public class CookshareConnectionService {
 		return frame;
 	}
 	
+	public byte[] getNewSalt() {
+		byte[] salt = new byte[16];
+		RANDOM.nextBytes(salt);
+		return salt;
+	}
+	
+	public String getStringFromBytes(byte[] data) {
+		return enc.encodeToString(data);
+	}
+
+	public String hashPassword(byte[] salt, String password) {
+
+		KeySpec spec = new PBEKeySpec(password.toCharArray(), salt, 65536, 128);
+		SecretKeyFactory f;
+		byte[] hash = null;
+		try {
+			f = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
+			hash = f.generateSecret(spec).getEncoded();
+		} catch (NoSuchAlgorithmException e) {
+			JOptionPane.showMessageDialog(null, "An error occurred during password hashing. See stack trace.");
+			e.printStackTrace();
+		} catch (InvalidKeySpecException e) {
+			JOptionPane.showMessageDialog(null, "An error occurred during password hashing. See stack trace.");
+			e.printStackTrace();
+		}
+		return getStringFromBytes(hash);
+	}
+	
 	/**
 	 * This action listener is associated with the connection button, and calls the 
 	 * relevant method when the button is hit
 	 * @author juricar
 	 *
 	 */
-	private class ConnectActionListener implements ActionListener{
+	private class RegisterActionListener implements ActionListener{
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			boolean connectionSuccessful = connectFromFrame();
-			if(!connectionSuccessful) {
-				System.out.println("Failed Connection");
-				JOptionPane.showMessageDialog(null, "Failed Connection");
+			String username = userBox.getText();
+			String password = passBox.getText();
+			byte[] salt = getNewSalt();
+			String hPwd = hashPassword(salt, password);
+			Connection con = getConnection();
+			try 
+			{
+				CallableStatement cs = con.prepareCall("{? = call Register(?,?,?)}");
+				cs.registerOutParameter(1, Types.INTEGER);
+				cs.setString(2, username);
+				cs.setBytes(3, salt);
+				cs.setString(4, hPwd);
+				cs.execute();
+				int returnValue = cs.getInt(1);
+				if(returnValue != 0)
+				{
+					JOptionPane.showMessageDialog(null, "Registration failed");
+					return;
+				}
+			} 
+			catch (SQLException e1) 
+			{
+				e1.printStackTrace();
+				JOptionPane.showMessageDialog(null, "Registration failed");
 				return;
 			}
-			CookshareConnectionService.this.setIsGuest(false);
 			openUseFrame();
 		}
 
@@ -293,14 +342,39 @@ public class CookshareConnectionService {
 
 	}
 	
-	private class ConnectGuestActionListener implements ActionListener{
+	private class LoginActionListener implements ActionListener{
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			boolean connectionSuccessful = connectGuest();
-			if(!connectionSuccessful) {
-				System.out.println("Failed Connection");
-				JOptionPane.showMessageDialog(null, "Failed Connection");
+			String query = "SELECT PasswordSalt, PasswordHash FROM [Cookshare].[dbo].[User] WHERE Username = ?";
+			String salt = null;
+			String hPwd = null;
+			String username = userBox.getText();
+			String password = passBox.getText();
+			try 
+			{
+				PreparedStatement stmt = getConnection().prepareStatement(query);
+				stmt.setString(1, username);
+				ResultSet rs = stmt.executeQuery();
+				rs.next();
+				salt = rs.getString("PasswordSalt");
+				hPwd = rs.getString("PasswordHash");
+				if(salt == null)
+				{
+					JOptionPane.showMessageDialog(null, "Login failed");
+					return;
+				}
+				String checkPwd = hashPassword(salt.getBytes(), password);
+				if(!(checkPwd.equals(hPwd)))
+				{
+					JOptionPane.showMessageDialog(null, "Login failed");
+					return;
+				}
+			} 
+			catch (SQLException e1) 
+			{
+				JOptionPane.showMessageDialog(null, "Login failed");
+				e1.printStackTrace();
 				return;
 			}
 			openUseFrame();
@@ -311,36 +385,7 @@ public class CookshareConnectionService {
 		}
 
 	}
-	
-	/**
-	 * This method gets called when the 'connect' button gets hit. Takes info from the user and password
-	 * boxes and connects with it.
-	 * @return
-	 */
-	private boolean connectFromFrame() {
-		
-		String user = this.userBox.getText();
-		String pass = this.passBox.getText();
-		
-		return connect(user, pass);
-	}
-	
-	/**
-	 * This just sets our user to a guest when they login without an administrator username and password.
-	 * @param b
-	 */
-	public void setIsGuest(boolean b) {
-		this.isGuest = b;		
-	}
 
-	private boolean connectGuest() {
-		
-		String user = "juricar";
-		String pass = "Atsknktvegef24035526LCA!";
-		
-		return connect(user, pass);
-	}
-	
 	/**
 	 * This button is attached to the 'Search' button, and executes the search when the button is hit.
 	 * @author juricar
