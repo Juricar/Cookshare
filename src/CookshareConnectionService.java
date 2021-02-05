@@ -387,7 +387,7 @@ public class CookshareConnectionService {
 	}
 
 	/**
-	 * This button is attached to the 'Search' button, and executes the search when the button is hit.
+	 * This button is attached to the 'Search' button, and executes the search when the button is hit. 
 	 * @author juricar
 	 *
 	 */
