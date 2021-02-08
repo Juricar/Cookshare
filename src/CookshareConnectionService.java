@@ -36,6 +36,7 @@ import javax.swing.plaf.basic.BasicOptionPaneUI;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumnModel;
+
 import java.util.Random;
 
 import javax.crypto.SecretKeyFactory;
@@ -54,6 +55,7 @@ public class CookshareConnectionService {
 	private JFrame loginFrame;
 	private JFrame useFrame;
 	private JFrame inputFrame;
+	private JFrame adderFrame;
 	private JTextField userBox;
 	private JTextField passBox;
 	private JTextField searchBox;
@@ -64,10 +66,12 @@ public class CookshareConnectionService {
 	private int numFields;
 	private ArrayList<String> fieldNames;
 	private JPanel inputPanel;
-	private ArrayList<JTextField> inputs;
+	private ArrayList<JTextField> inputs = new ArrayList<JTextField>();
 	private JRadioButton isUpdate;
 	private String[] tableNames = {"Cuisine", "BelongsTo", "Dish", "Has", "Ingredients", "Recipe", "Reviews", "Steps", "User", "Uses", "Utensils"};
 	private JButton searchButton;
+	private JButton addButton;
+	private String tableToAddTo;
 	String user = "juricar";
 	String pass = "Atsknktvegef24035526LCA!";
 	
@@ -156,9 +160,12 @@ public class CookshareConnectionService {
 		try {
 //			String query = "EXEC "+this.procLookupTables.get(STARTINGTABLE); //The starting info, in there by default.
 //			PreparedStatement ps = connection.prepareStatement(query);
-			String query = "Exec searchRecipe";
-			Statement stmt = connection.createStatement();
-			ResultSet rs = stmt.executeQuery(query);
+//			String query = "Select * From Recipe Where Verified = 1";
+//			Statement stmt = connection.createStatement();
+			CallableStatement cs = getConnection().prepareCall("{call search(?)}");
+			cs.setString(1, "BelongsTo");
+			cs.execute();
+			ResultSet rs = cs.getResultSet();;
 			ResultSetMetaData rsmd = rs.getMetaData();
 			//System.out.println("Made Query");
 			
@@ -201,8 +208,13 @@ public class CookshareConnectionService {
 			searchButton.addActionListener(new SearchButtonListener());
 			this.searchButton = searchButton;
 			
+			JButton addButton = new JButton("Add");
+			addButton.addActionListener(new AddButtonListener());
+			this.addButton = addButton;
+			
 			topPanel.add(tableList, BorderLayout.WEST);
 			topPanel.add(searchButton, BorderLayout.EAST);
+			topPanel.add(addButton, BorderLayout.EAST);
 			panel.add(scrollPane, BorderLayout.CENTER);
 			frame.pack();
 			frame.setVisible(true);
@@ -387,7 +399,7 @@ public class CookshareConnectionService {
 	}
 
 	/**
-	 * This button is attached to the 'Search' button, and executes the search when the button is hit. 
+	 * This button is attached to the 'Search' button, and executes the search when the button is hit.
 	 * @author juricar
 	 *
 	 */
@@ -396,14 +408,11 @@ public class CookshareConnectionService {
 		@Override
 		public void actionPerformed(ActionEvent arg0) {
 			
-			String query = "SELECT * FROM ";
+//			String query = "SELECT * FROM ";
 			try {
-				query += "[" + String.valueOf(selectionMenu.getSelectedItem()) + "]";
-				
-				if (selectionMenu.getSelectedItem() == "Recipe") {
-					query = "Exec searchRecipe";
-				}
-				CallableStatement cs = getConnection().prepareCall(query);
+//				query += "[" + String.valueOf(selectionMenu.getSelectedItem()) + "]";
+				CallableStatement cs = getConnection().prepareCall("{call search(?)}");
+				cs.setString(1, String.valueOf(selectionMenu.getSelectedItem()));
 				cs.execute();
 				ResultSet rs = cs.getResultSet();
 				ResultSetMetaData rsmd = rs.getMetaData();
@@ -442,4 +451,200 @@ public class CookshareConnectionService {
 		
 	}
 	}
+	
+	/**
+	 * This button is attached to the 'Add' button, and executes the add when the button is hit.
+	 * @author mcgeeca
+	 *
+	 */
+	private class AddButtonListener implements ActionListener{
+
+		@Override
+		public void actionPerformed(ActionEvent arg0) {
+			tableToAddTo = String.valueOf(selectionMenu.getSelectedItem());
+//			String query = "SELECT * FROM ";
+			try {
+//				query += String.valueOf(selectionMenu.getSelectedItem());
+//				System.out.println(query);
+				CallableStatement cs = getConnection().prepareCall("{call search(?)}");
+				cs.setString(1, String.valueOf(selectionMenu.getSelectedItem()));				
+				cs.execute();
+				ResultSet rs = cs.getResultSet();
+				ResultSetMetaData rsmd = rs.getMetaData();
+				
+				
+				JTable table = new JTable(new DefaultTableModel());
+				ArrayList<String> names = new ArrayList<String>();
+				int columnCount = rsmd.getColumnCount();
+				numFields = columnCount;
+			
+				for(int i = 0; i < columnCount; i++) {
+					names.add(rsmd.getColumnName(i+1));					
+				}
+				fieldNames = names;
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			addFrame(tableToAddTo);
+
+		}
+
+	}
+	
+	private class CompleteAddActionListener implements ActionListener {
+		@Override
+		public void actionPerformed(ActionEvent arg0) {
+			String storedProcedure = "{? = call add";
+			try {
+				Connection con = getConnection();
+				CallableStatement cs = null;
+				int questionMarkIndex = 2;
+
+				switch (tableToAddTo) {
+					case "BelongsTo":
+						cs = getConnection().prepareCall("{? = call addBelongsTo(?,?)}");
+						cs.registerOutParameter(1, Types.INTEGER);
+						for(int i = 0; i < inputs.size(); i++) {
+							cs.setInt(questionMarkIndex, Integer.parseInt(inputs.get(i).getText()));
+							questionMarkIndex++;
+						}
+						break;
+					
+					case "Dish":
+						cs = getConnection().prepareCall("{? = call addDish(?,?)}");
+						cs.registerOutParameter(1, Types.INTEGER);
+						for(int i = 0; i < inputs.size(); i++) {
+							cs.setString(questionMarkIndex, inputs.get(i).getText());
+							questionMarkIndex++;
+						}
+						break;
+					
+					case "Has":
+						cs = getConnection().prepareCall("{? = call addHas(?,?)}");
+						cs.registerOutParameter(1, Types.INTEGER);
+						for(int i = 0; i < inputs.size(); i++) {
+							cs.setInt(questionMarkIndex, Integer.parseInt(inputs.get(i).getText()));
+							questionMarkIndex++;
+						}
+						break;
+						
+					case "Ingredients":
+						cs = getConnection().prepareCall("{? = call addIngredients(?,?)}");
+						cs.registerOutParameter(1, Types.INTEGER);
+						for(int i = 0; i < inputs.size(); i++) {
+							cs.setString(questionMarkIndex, inputs.get(i).getText());
+							questionMarkIndex++;
+						}
+						break;
+					
+					case "Recipe":
+						cs = getConnection().prepareCall("{? = call addRecipe(?,?,?,?,?)}");
+						cs.registerOutParameter(1, Types.INTEGER);
+						System.out.println(inputs.get(0).getText());
+						System.out.println(inputs.get(1).getText());
+						System.out.println(inputs.get(2).getText());
+						System.out.println(inputs.get(3).getText());
+						System.out.println(inputs.get(4).getText());
+
+						for(int i = 0; i < inputs.size(); i++) {
+//							System.out.println(inputs.get(i).getText());
+							if(i == 0 || i == 1 || i == 3) {
+								cs.setString(questionMarkIndex, inputs.get(i).getText());
+								questionMarkIndex++;
+							}
+							else if(i == 4) {
+								cs.setInt(questionMarkIndex, Integer.parseInt(inputs.get(i).getText()));
+								questionMarkIndex++;
+							} 
+							else if (i == 2 && inputs.get(i).getText().isEmpty()){
+								cs.setString(questionMarkIndex, inputs.get(i).getText());
+								questionMarkIndex++;
+							}
+							else {
+								cs.setInt(questionMarkIndex, Integer.parseInt(inputs.get(i).getText()));
+							}
+						}
+						break;
+					
+					case "Reviews":
+						cs = getConnection().prepareCall("{? = call addReviews(?,?,?,?)}");
+						cs.registerOutParameter(1, Types.INTEGER);
+						for(int i = 0; i < inputs.size(); i++) {
+							if(i != 0 || i != 3) {
+								cs.setInt(questionMarkIndex, Integer.parseInt(inputs.get(i).getText()));
+								questionMarkIndex++;
+							} 
+							else {
+								cs.setString(questionMarkIndex, inputs.get(i).getText());
+								questionMarkIndex++;
+							}
+						}
+						break;
+					
+					case "Steps":
+						cs = getConnection().prepareCall("{? = call addSteps(?,?,?)}");
+						cs.registerOutParameter(1, Types.INTEGER);
+						for(int i = 0; i < inputs.size(); i++) {
+							if(i != 1 || i != 3) {
+								cs.setInt(questionMarkIndex, Integer.parseInt(inputs.get(i).getText()));
+								questionMarkIndex++;
+							} 
+							else {
+								cs.setString(questionMarkIndex, inputs.get(i).getText());
+								questionMarkIndex++;
+							}
+						}
+						break;
+					
+					case "Utensils":
+						cs = getConnection().prepareCall("{? = call addUtensils(?)}");
+						cs.registerOutParameter(1, Types.INTEGER);
+						cs.setString(questionMarkIndex, inputs.get(0).getText());
+						break;
+				}
+				cs.execute();
+				System.out.println("Adding Dish complete!");
+				adderFrame.dispose();
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				System.out.println("Didn't work again.");
+				e.printStackTrace();
+			}
+			
+		}
+	}
+	
+	private void addFrame(String tableToAddTo) {
+		if(this.adderFrame != null) {
+			return;
+		}
+		
+		
+		JFrame frame = new JFrame();
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		JPanel panel = new JPanel();
+		
+		for(int i = 0; i < this.fieldNames.size(); i++) {
+			if(!(this.fieldNames.get(i).equals("ID"))) {
+				JTextField textBox = new JTextField(50);
+				textBox.setText(this.fieldNames.get(i));
+				panel.add(textBox);
+				this.inputs.add(textBox);
+			}
+		System.out.println(this.inputs.size());
+		}
+		
+		JButton completeAdd = new JButton("Complete " + tableToAddTo);
+		completeAdd.addActionListener(new CompleteAddActionListener());
+		this.adderFrame = frame;
+		panel.add(completeAdd);
+		frame.add(panel);
+		frame.pack();
+		frame.setVisible(true);
+		
+	}
+	
+	
 }

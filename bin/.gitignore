@@ -1,9 +1,7 @@
 /ConnectionClient.class
-/CookshareConnectionService$ConnectActionListener.class
-/CookshareConnectionService$ConnectGuestActionListener.class
-/CookshareConnectionService$InsertButtonListener.class
-/CookshareConnectionService$SearchButtonListener.class
-/CookshareConnectionService$TableSwitchListener.class
-/CookshareConnectionService.class
 /CookshareConnectionService$LoginActionListener.class
 /CookshareConnectionService$RegisterActionListener.class
+/CookshareConnectionService$SearchButtonListener.class
+/CookshareConnectionService.class
+/CookshareConnectionService$AddButtonListener.class
+/CookshareConnectionService$CompleteAddActionListener.class
