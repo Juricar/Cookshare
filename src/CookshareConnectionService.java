@@ -71,6 +71,7 @@ public class CookshareConnectionService {
 	private String[] tableNames = {"Cuisine", "BelongsTo", "Dish", "Has", "Ingredients", "Recipe", "Reviews", "Steps", "User", "Uses", "Utensils"};
 	private JButton searchButton;
 	private JButton addButton;
+	private JButton deleteButton;
 	private String tableToAddTo;
 	String user = "juricar";
 	String pass = "Atsknktvegef24035526LCA!";
@@ -158,10 +159,6 @@ public class CookshareConnectionService {
 		this.useFrame = frame;
 		
 		try {
-//			String query = "EXEC "+this.procLookupTables.get(STARTINGTABLE); //The starting info, in there by default.
-//			PreparedStatement ps = connection.prepareStatement(query);
-//			String query = "Select * From Recipe Where Verified = 1";
-//			Statement stmt = connection.createStatement();
 			CallableStatement cs = getConnection().prepareCall("{call search(?)}");
 			cs.setString(1, "BelongsTo");
 			cs.execute();
@@ -212,9 +209,14 @@ public class CookshareConnectionService {
 			addButton.addActionListener(new AddButtonListener());
 			this.addButton = addButton;
 			
+			JButton deleteButton = new JButton("Delete");
+//			deleteButton.addActionListener(new DeleteButtonListener());
+			this.deleteButton = deleteButton;
+			
 			topPanel.add(tableList, BorderLayout.WEST);
 			topPanel.add(searchButton, BorderLayout.EAST);
 			topPanel.add(addButton, BorderLayout.EAST);
+			topPanel.add(deleteButton, BorderLayout.EAST);
 			panel.add(scrollPane, BorderLayout.CENTER);
 			frame.pack();
 			frame.setVisible(true);
@@ -496,7 +498,6 @@ public class CookshareConnectionService {
 	private class CompleteAddActionListener implements ActionListener {
 		@Override
 		public void actionPerformed(ActionEvent arg0) {
-			String storedProcedure = "{? = call add";
 			try {
 				Connection con = getConnection();
 				CallableStatement cs = null;
@@ -584,7 +585,7 @@ public class CookshareConnectionService {
 						break;
 					
 					case "Steps":
-						cs = getConnection().prepareCall("{? = call addSteps(?,?,?)}");
+						cs = getConnection().prepareCall("{? = call addSteps(?,?,?,?)}");
 						cs.registerOutParameter(1, Types.INTEGER);
 						for(int i = 0; i < inputs.size(); i++) {
 							if(i != 1 || i != 3) {
@@ -605,7 +606,7 @@ public class CookshareConnectionService {
 						break;
 				}
 				cs.execute();
-				System.out.println("Adding Dish complete!");
+//				System.out.println("Adding Dish complete!");
 				adderFrame.dispose();
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
@@ -633,7 +634,12 @@ public class CookshareConnectionService {
 				panel.add(textBox);
 				this.inputs.add(textBox);
 			}
-		System.out.println(this.inputs.size());
+//			else if(this.fieldNames.get(i).equals("ID") && String.valueOf(selectionMenu.getSelectedItem()).equals("Steps")) {
+//				JTextField textBox = new JTextField(50);
+//				textBox.setText(this.fieldNames.get(i));
+//				panel.add(textBox);
+//				this.inputs.add(textBox);
+//			}
 		}
 		
 		JButton completeAdd = new JButton("Complete " + tableToAddTo);
