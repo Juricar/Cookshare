@@ -75,6 +75,8 @@ public class CookshareConnectionService {
 	private String tableToAddTo;
 	String user = "juricar";
 	String pass = "Atsknktvegef24035526LCA!";
+	private String dbUsername;
+	private String dbPassword;
 	
 	private final String STARTINGTABLE = "People";
 	
@@ -321,16 +323,16 @@ public class CookshareConnectionService {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			String username = userBox.getText();
-			String password = passBox.getText();
+			dbUsername = userBox.getText();
+			dbPassword = passBox.getText();
 			byte[] salt = getNewSalt();
-			String hPwd = hashPassword(salt, password);
+			String hPwd = hashPassword(salt, dbPassword);
 			Connection con = getConnection();
 			try 
 			{
 				CallableStatement cs = con.prepareCall("{? = call Register(?,?,?)}");
 				cs.registerOutParameter(1, Types.INTEGER);
-				cs.setString(2, username);
+				cs.setString(2, dbUsername);
 				cs.setBytes(3, salt);
 				cs.setString(4, hPwd);
 				cs.execute();
@@ -363,12 +365,12 @@ public class CookshareConnectionService {
 			String query = "SELECT PasswordSalt, PasswordHash FROM [Cookshare].[dbo].[User] WHERE Username = ?";
 			String salt = null;
 			String hPwd = null;
-			String username = userBox.getText();
-			String password = passBox.getText();
+			dbUsername = userBox.getText();
+			dbPassword = passBox.getText();
 			try 
 			{
 				PreparedStatement stmt = getConnection().prepareStatement(query);
-				stmt.setString(1, username);
+				stmt.setString(1, dbUsername);
 				ResultSet rs = stmt.executeQuery();
 				rs.next();
 				salt = rs.getString("PasswordSalt");
@@ -378,7 +380,7 @@ public class CookshareConnectionService {
 					JOptionPane.showMessageDialog(null, "Login failed");
 					return;
 				}
-				String checkPwd = hashPassword(salt.getBytes(), password);
+				String checkPwd = hashPassword(salt.getBytes(), dbPassword);
 				if(!(checkPwd.equals(hPwd)))
 				{
 					JOptionPane.showMessageDialog(null, "Login failed");
@@ -481,7 +483,14 @@ public class CookshareConnectionService {
 				numFields = columnCount;
 			
 				for(int i = 0; i < columnCount; i++) {
-					names.add(rsmd.getColumnName(i+1));					
+					if(rsmd.getColumnName(i+1).equals("DishID"))
+					{
+						names.add("DishName");
+					}
+					else
+					{
+						names.add(rsmd.getColumnName(i+1));					
+					}
 				}
 				fieldNames = names;
 			} catch (SQLException e) {
@@ -543,11 +552,10 @@ public class CookshareConnectionService {
 					case "Recipe":
 						cs = getConnection().prepareCall("{? = call addRecipe(?,?,?,?,?)}");
 						cs.registerOutParameter(1, Types.INTEGER);
-						System.out.println(inputs.get(0).getText());
-						System.out.println(inputs.get(1).getText());
-						System.out.println(inputs.get(2).getText());
-						System.out.println(inputs.get(3).getText());
-						System.out.println(inputs.get(4).getText());
+//						System.out.println(inputs.get(0).getText());
+//						System.out.println(inputs.get(1).getText());
+//						System.out.println(inputs.get(2).getText());
+//						System.out.println(inputs.get(3).getText());
 
 						for(int i = 0; i < inputs.size(); i++) {
 //							System.out.println(inputs.get(i).getText());
@@ -555,28 +563,36 @@ public class CookshareConnectionService {
 								cs.setString(questionMarkIndex, inputs.get(i).getText());
 								questionMarkIndex++;
 							}
-							else if(i == 4) {
-								cs.setInt(questionMarkIndex, Integer.parseInt(inputs.get(i).getText()));
-								questionMarkIndex++;
-							} 
-							else if (i == 2 && inputs.get(i).getText().isEmpty()){
-								cs.setString(questionMarkIndex, inputs.get(i).getText());
+							else if (i == 2 ){
+								if(inputs.get(i).getText().isEmpty())
+								{
+									cs.setString(questionMarkIndex, inputs.get(i).getText());
+								}
+								else
+								{
+									cs.setInt(questionMarkIndex, Integer.parseInt(inputs.get(i).getText()));
+								}
 								questionMarkIndex++;
 							}
 							else {
 								cs.setInt(questionMarkIndex, Integer.parseInt(inputs.get(i).getText()));
+								questionMarkIndex++;
 							}
 						}
+						
+						cs.setString(6, dbUsername);
 						break;
 					
 					case "Reviews":
 						cs = getConnection().prepareCall("{? = call addReviews(?,?,?,?)}");
 						cs.registerOutParameter(1, Types.INTEGER);
+						cs.setString(questionMarkIndex, dbUsername);
+						questionMarkIndex++;
 						for(int i = 0; i < inputs.size(); i++) {
-							if(i != 0 || i != 3) {
+							if(i == 0 || i == 1) {
 								cs.setInt(questionMarkIndex, Integer.parseInt(inputs.get(i).getText()));
 								questionMarkIndex++;
-							} 
+							}
 							else {
 								cs.setString(questionMarkIndex, inputs.get(i).getText());
 								questionMarkIndex++;
@@ -588,7 +604,7 @@ public class CookshareConnectionService {
 						cs = getConnection().prepareCall("{? = call addSteps(?,?,?,?)}");
 						cs.registerOutParameter(1, Types.INTEGER);
 						for(int i = 0; i < inputs.size(); i++) {
-							if(i != 1 || i != 3) {
+							if(i == 0 || i == 2) {
 								cs.setInt(questionMarkIndex, Integer.parseInt(inputs.get(i).getText()));
 								questionMarkIndex++;
 							} 
@@ -597,6 +613,7 @@ public class CookshareConnectionService {
 								questionMarkIndex++;
 							}
 						}
+						cs.setString(questionMarkIndex, dbUsername);
 						break;
 					
 					case "Utensils":
@@ -618,17 +635,14 @@ public class CookshareConnectionService {
 	}
 	
 	private void addFrame(String tableToAddTo) {
-		if(this.adderFrame != null) {
-			return;
-		}
 		
-		
+		inputs.clear();
 		JFrame frame = new JFrame();
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		JPanel panel = new JPanel();
 		
 		for(int i = 0; i < this.fieldNames.size(); i++) {
-			if(!(this.fieldNames.get(i).equals("ID"))) {
+			if(!(this.fieldNames.get(i).equals("ID") || this.fieldNames.get(i).equals("UserID") || this.fieldNames.get(i).equals("Username") || this.fieldNames.get(i).equals("Author"))) {
 				JTextField textBox = new JTextField(50);
 				textBox.setText(this.fieldNames.get(i));
 				panel.add(textBox);
