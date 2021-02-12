@@ -62,6 +62,7 @@ public class CookshareConnectionService {
 	private JTextField passBox;
 	private JTable table;
 	private JComboBox selectionMenu;
+	private JFrame frameToDispose;
 	JScrollPane scrollPane;
 	private int numFields;
 	private ArrayList<String> fieldNames;
@@ -154,8 +155,9 @@ public class CookshareConnectionService {
 		this.useFrame = frame;
 		
 		try {
-			CallableStatement cs = getConnection().prepareCall("{call search(?)}");
+			CallableStatement cs = getConnection().prepareCall("{call search(?,?)}");
 			cs.setString(1, "BelongsTo");
+			cs.setString(2, "");
 			cs.execute();
 			ResultSet rs = cs.getResultSet();;
 			ResultSetMetaData rsmd = rs.getMetaData();
@@ -184,16 +186,53 @@ public class CookshareConnectionService {
 				model.addRow(data);
 			}
 			
+			
+			
 			scrollPane = new JScrollPane(table);
 			
 			this.table = table;
 			table.setDefaultEditor(Object.class, null);
 			table.getTableHeader().setReorderingAllowed(false); 
+			
+			//Big fancy listener that determines what the table does on-click
 			table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
 				public void valueChanged(ListSelectionEvent event) {
 					if(event.getValueIsAdjusting() && table.getSelectedRow() != -1) {
-						System.out.println(table.getValueAt(table.getSelectedRow(), 0).toString());
-						System.out.println(tableToAddTo);
+						switch(selectionMenu.getSelectedItem().toString()) {
+						
+							case "Recipe":
+								ArrayList<String> names = new ArrayList<String>();
+								names.add("View Steps");
+								names.add("Delete");
+								ArrayList<ActionListener> listeners = new ArrayList<ActionListener>();
+								listeners.add(new ActionListener() {
+									public void actionPerformed (ActionEvent e) {
+										searchTables("Steps", table.getValueAt(table.getSelectedRow(), 0).toString());
+										selectionMenu.setSelectedIndex(7);
+										frameToDispose.dispose();
+									}
+								});
+								listeners.add(new ActionListener() {
+									public void actionPerformed (ActionEvent e) {
+										if (dbUsername.equals(table.getValueAt(table.getSelectedRow(), 4).toString())) {
+											try {
+												CallableStatement cs = getConnection().prepareCall("{call deleteRecipe(?,?)}");
+												cs.setString(1, table.getValueAt(table.getSelectedRow(), 0).toString());
+												cs.setString(2, dbUsername);
+												cs.execute();
+												searchTables("Recipe", "");
+											} catch (SQLException err) {
+												err.printStackTrace();
+											}
+											frameToDispose.dispose();
+										} else {
+											JOptionPane.showMessageDialog(null, "You cannot delete other user's recipes!");
+										}
+									}
+								});
+								contextMenu(names, listeners);
+								break;
+						}
 					}
 					
 				}
@@ -403,12 +442,11 @@ public class CookshareConnectionService {
 
 		@Override
 		public void actionPerformed(ActionEvent arg0) {
-			
-//			String query = "SELECT * FROM ";
 			try {
 //				query += "[" + String.valueOf(selectionMenu.getSelectedItem()) + "]";
-				CallableStatement cs = getConnection().prepareCall("{call search(?)}");
+				CallableStatement cs = getConnection().prepareCall("{call search(?,?)}");
 				cs.setString(1, String.valueOf(selectionMenu.getSelectedItem()));
+				cs.setString(2, "");
 				cs.execute();
 				ResultSet rs = cs.getResultSet();
 				ResultSetMetaData rsmd = rs.getMetaData();
@@ -440,8 +478,44 @@ public class CookshareConnectionService {
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
-		
+		}
 	}
+	
+	public void searchTables(String tableToSearch, String searchParam) {
+		try {
+			CallableStatement cs = getConnection().prepareCall("{call search(?,?)}");
+			cs.setString(1, tableToSearch);
+			cs.setString(2, searchParam);
+			cs.execute();
+			ResultSet rs = cs.getResultSet();
+			ResultSetMetaData rsmd = rs.getMetaData();
+			
+			ArrayList<String> names = new ArrayList<String>();
+			int columnCount = rsmd.getColumnCount();
+			numFields = columnCount;
+		
+			DefaultTableModel model = (DefaultTableModel) table.getModel();
+			model.setColumnCount(0);
+			model.setRowCount(0);
+			for(int i = 0; i < columnCount; i++) {
+				names.add(rsmd.getColumnName(i+1));
+				model.addColumn(rsmd.getColumnName(i+1));
+				
+			}
+			fieldNames = names;
+			
+			while(rs.next()) {
+				Object[] data = new Object[names.size()];
+				for(int j = 0; j < names.size(); j++) {
+					data[j] = rs.getString(j+1);
+				}
+				model.addRow(data);
+			}
+			
+			scrollPane.getViewport ().add (table);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	/**
@@ -458,8 +532,9 @@ public class CookshareConnectionService {
 			try {
 //				query += String.valueOf(selectionMenu.getSelectedItem());
 //				System.out.println(query);
-				CallableStatement cs = getConnection().prepareCall("{call search(?)}");
-				cs.setString(1, String.valueOf(selectionMenu.getSelectedItem()));				
+				CallableStatement cs = getConnection().prepareCall("{call search(?,?)}");
+				cs.setString(1, String.valueOf(selectionMenu.getSelectedItem()));
+				cs.setString(2, "");
 				cs.execute();
 				ResultSet rs = cs.getResultSet();
 				ResultSetMetaData rsmd = rs.getMetaData();
@@ -617,7 +692,7 @@ public class CookshareConnectionService {
 		
 		inputs.clear();
 		JFrame frame = new JFrame();
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		JPanel panel = new JPanel();
 		
 		for(int i = 0; i < this.fieldNames.size(); i++) {
@@ -643,6 +718,24 @@ public class CookshareConnectionService {
 		frame.pack();
 		frame.setVisible(true);
 		
+	}
+	
+	private void contextMenu(ArrayList<String> buttons, ArrayList<ActionListener> listeners) {
+		
+		JFrame frame = new JFrame("Options");
+		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		JPanel panel = new JPanel();
+		
+		for (int i = 0; i < buttons.size(); i++) {
+			JButton button = new JButton(buttons.get(i));
+			button.addActionListener(listeners.get(i));
+			panel.add(button);
+		}
+		
+		frame.add(panel);
+		frame.pack();
+		frameToDispose = frame;
+		frame.setVisible(true);
 	}
 	
 	
