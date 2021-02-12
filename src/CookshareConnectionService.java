@@ -32,6 +32,8 @@ import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.plaf.basic.BasicOptionPaneUI;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableModel;
@@ -58,27 +60,18 @@ public class CookshareConnectionService {
 	private JFrame adderFrame;
 	private JTextField userBox;
 	private JTextField passBox;
-	private JTextField searchBox;
 	private JTable table;
 	private JComboBox selectionMenu;
-	private JComboBox constraintMenu;
 	JScrollPane scrollPane;
 	private int numFields;
 	private ArrayList<String> fieldNames;
-	private JPanel inputPanel;
 	private ArrayList<JTextField> inputs = new ArrayList<JTextField>();
-	private JRadioButton isUpdate;
 	private String[] tableNames = {"Cuisine", "BelongsTo", "Dish", "Has", "Ingredients", "Recipe", "Reviews", "Steps", "User", "Uses", "Utensils"};
-	private JButton searchButton;
-	private JButton addButton;
-	private JButton deleteButton;
 	private String tableToAddTo;
 	String user = "juricar";
 	String pass = "Atsknktvegef24035526LCA!";
 	private String dbUsername;
 	private String dbPassword;
-	
-	private final String STARTINGTABLE = "People";
 	
 	private static final Random RANDOM = new SecureRandom();
 	private static final Base64.Encoder enc = Base64.getEncoder();
@@ -183,9 +176,7 @@ public class CookshareConnectionService {
 			}
 			fieldNames = names;
 			
-			int i = 0;
 			while(rs.next()) {
-				i++;
 				Object[] data = new Object[names.size()];
 				for(int j = 0; j < names.size(); j++) {
 					data[j] = rs.getString(j+1);
@@ -198,6 +189,15 @@ public class CookshareConnectionService {
 			this.table = table;
 			table.setDefaultEditor(Object.class, null);
 			table.getTableHeader().setReorderingAllowed(false); 
+			table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+				public void valueChanged(ListSelectionEvent event) {
+					if(event.getValueIsAdjusting() && table.getSelectedRow() != -1) {
+						System.out.println(table.getValueAt(table.getSelectedRow(), 0).toString());
+						System.out.println(tableToAddTo);
+					}
+					
+				}
+			});
 			
 			JComboBox tableList = new JComboBox(tableNames);
 			tableList.setSelectedIndex(1);
@@ -205,15 +205,12 @@ public class CookshareConnectionService {
 			
 			JButton searchButton = new JButton("Search");
 			searchButton.addActionListener(new SearchButtonListener());
-			this.searchButton = searchButton;
 			
 			JButton addButton = new JButton("Add");
 			addButton.addActionListener(new AddButtonListener());
-			this.addButton = addButton;
 			
 			JButton deleteButton = new JButton("Delete");
 //			deleteButton.addActionListener(new DeleteButtonListener());
-			this.deleteButton = deleteButton;
 			
 			topPanel.add(tableList, BorderLayout.WEST);
 			topPanel.add(searchButton, BorderLayout.EAST);
@@ -238,15 +235,10 @@ public class CookshareConnectionService {
 	 */
 	private void createMenuBar(JFrame frame) {
 		JMenuBar menuBar = new JMenuBar();
-		JMenu menu = new JMenu("Applications");
 		
 		JMenuItem search = new JMenuItem("Search");
 		search.setToolTipText("Search through the Database");
 		search.addActionListener((event) -> openUseFrame());
-				
-		menu.add(search);
-		
-		menuBar.add(menu);
 		
 		frame.setJMenuBar(menuBar);
 		
@@ -422,7 +414,6 @@ public class CookshareConnectionService {
 				ResultSetMetaData rsmd = rs.getMetaData();
 				//System.out.println("Made Query");
 				
-				JTable table = new JTable(new DefaultTableModel());
 				ArrayList<String> names = new ArrayList<String>();
 				int columnCount = rsmd.getColumnCount();
 				numFields = columnCount;
@@ -437,9 +428,7 @@ public class CookshareConnectionService {
 				}
 				fieldNames = names;
 				
-				int i = 0;
 				while(rs.next()) {
-					i++;
 					Object[] data = new Object[names.size()];
 					for(int j = 0; j < names.size(); j++) {
 						data[j] = rs.getString(j+1);
@@ -449,7 +438,6 @@ public class CookshareConnectionService {
 				
 				scrollPane.getViewport ().add (table);
 			} catch (SQLException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		
@@ -476,8 +464,6 @@ public class CookshareConnectionService {
 				ResultSet rs = cs.getResultSet();
 				ResultSetMetaData rsmd = rs.getMetaData();
 				
-				
-				JTable table = new JTable(new DefaultTableModel());
 				ArrayList<String> names = new ArrayList<String>();
 				int columnCount = rsmd.getColumnCount();
 				numFields = columnCount;
@@ -494,7 +480,6 @@ public class CookshareConnectionService {
 				}
 				fieldNames = names;
 			} catch (SQLException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			
@@ -508,7 +493,6 @@ public class CookshareConnectionService {
 		@Override
 		public void actionPerformed(ActionEvent arg0) {
 			try {
-				Connection con = getConnection();
 				CallableStatement cs = null;
 				int questionMarkIndex = 2;
 
@@ -552,10 +536,6 @@ public class CookshareConnectionService {
 					case "Recipe":
 						cs = getConnection().prepareCall("{? = call addRecipe(?,?,?,?,?)}");
 						cs.registerOutParameter(1, Types.INTEGER);
-//						System.out.println(inputs.get(0).getText());
-//						System.out.println(inputs.get(1).getText());
-//						System.out.println(inputs.get(2).getText());
-//						System.out.println(inputs.get(3).getText());
 
 						for(int i = 0; i < inputs.size(); i++) {
 //							System.out.println(inputs.get(i).getText());
@@ -626,7 +606,6 @@ public class CookshareConnectionService {
 //				System.out.println("Adding Dish complete!");
 				adderFrame.dispose();
 			} catch (SQLException e) {
-				// TODO Auto-generated catch block
 				System.out.println("Didn't work again.");
 				e.printStackTrace();
 			}
@@ -643,7 +622,7 @@ public class CookshareConnectionService {
 		
 		for(int i = 0; i < this.fieldNames.size(); i++) {
 			if(!(this.fieldNames.get(i).equals("ID") || this.fieldNames.get(i).equals("UserID") || this.fieldNames.get(i).equals("Username") || this.fieldNames.get(i).equals("Author"))) {
-				JTextField textBox = new JTextField(50);
+				JTextField textBox = new JTextField(20);
 				textBox.setText(this.fieldNames.get(i));
 				panel.add(textBox);
 				this.inputs.add(textBox);
