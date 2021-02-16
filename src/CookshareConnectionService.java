@@ -252,14 +252,12 @@ public class CookshareConnectionService {
 								listeners.add(new ActionListener() {
 									public void actionPerformed (ActionEvent e){
 										searchTables("Recipe", table.getValueAt(table.getSelectedRow(), 0).toString());
-										selectionMenu.setSelectedIndex(7);
 										frameToDispose.dispose();
 									}
 								});
 								listeners.add(new ActionListener() {
 									public void actionPerformed (ActionEvent e){
 										searchTables("Recipe", table.getValueAt(table.getSelectedRow(), 2).toString());
-										selectionMenu.setSelectedIndex(7);
 										frameToDispose.dispose();
 									}
 								});
@@ -268,7 +266,8 @@ public class CookshareConnectionService {
 								names.add("View User's Recipes");
 								listeners.add(new ActionListener() {
 									public void actionPerformed (ActionEvent e){
-										//filterTables("Recipe", "User", table.getValueAt(table.getSelectedRow(), 1).toString());
+										filterTables("Recipe", "User", table.getValueAt(table.getSelectedRow(), 0).toString());
+										frameToDispose.dispose();
 									}
 								});
 						}
@@ -493,55 +492,35 @@ public class CookshareConnectionService {
 
 		@Override
 		public void actionPerformed(ActionEvent arg0) {
-			try {
-				CallableStatement cs = null;
-				if(String.valueOf(filterMenu.getSelectedItem()).equals("All"))
-				{
-					cs = getConnection().prepareCall("{call search(?,?)}");
-					cs.setString(1, String.valueOf(selectionMenu.getSelectedItem()));
-					cs.setString(2, "");
-					cs.execute();
-				}
-				else
-				{
-					cs = getConnection().prepareCall("{call filter(?,?,?)}");
-					cs.setString(1, String.valueOf(selectionMenu.getSelectedItem()));
-					cs.setString(2, String.valueOf(filterMenu.getSelectedItem()));
-					cs.setString(3, String.valueOf(filterValue.getText()));
-					cs.execute();
-				}
-				//System.out.println("Made Query");
-				ResultSet rs = cs.getResultSet();
-				ResultSetMetaData rsmd = rs.getMetaData();
-				ArrayList<String> names = new ArrayList<String>();
-				int columnCount = rsmd.getColumnCount();
-				numFields = columnCount;
-			
-				DefaultTableModel model = (DefaultTableModel) table.getModel();
-				model.setColumnCount(0);
-				model.setRowCount(0);
-				for(int i = 0; i < columnCount; i++) {
-					names.add(rsmd.getColumnName(i+1));
-					model.addColumn(rsmd.getColumnName(i+1));
-					
-				}
-				fieldNames = names;
-				
-				while(rs.next()) {
-					Object[] data = new Object[names.size()];
-					for(int j = 0; j < names.size(); j++) {
-						data[j] = rs.getString(j+1);
-					}
-					model.addRow(data);
-				}
-				
-				scrollPane.getViewport ().add (table);
-			} catch (SQLException e) {
-				e.printStackTrace();
+			if(String.valueOf(filterMenu.getSelectedItem()).equals("All"))
+			{
+				searchTables(String.valueOf(selectionMenu.getSelectedItem()), "");
+			}
+			else
+			{
+				filterTables(String.valueOf(selectionMenu.getSelectedItem()), String.valueOf(filterMenu.getSelectedItem()), String.valueOf(filterValue.getText()));
 			}
 		}
 	}
 
+	
+	public void filterTables(String tableToFilter, String filterColumn, String filterValue)
+	{
+		CallableStatement cs;
+		try {
+			cs = getConnection().prepareCall("{call filter(?,?,?)}");
+			cs.setString(1, tableToFilter);
+			cs.setString(2, filterColumn);
+			cs.setString(3, filterValue);
+			cs.execute();
+			ResultSet rs = cs.getResultSet();
+			ResultSetMetaData rsmd = rs.getMetaData();
+			parseResults(rs, rsmd);
+		}
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
 	
 	public void searchTables(String tableToSearch, String searchParam) {
 		try {
@@ -549,11 +528,24 @@ public class CookshareConnectionService {
 			cs.setString(1, tableToSearch);
 			cs.setString(2, searchParam);
 			cs.execute();
+			
 			ResultSet rs = cs.getResultSet();
 			ResultSetMetaData rsmd = rs.getMetaData();
+			parseResults(rs, rsmd);
 			
-			ArrayList<String> names = new ArrayList<String>();
-			int columnCount = rsmd.getColumnCount();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void parseResults(ResultSet rs, ResultSetMetaData rsmd)
+	{
+		
+		ArrayList<String> names = new ArrayList<String>();
+		int columnCount;
+		try {
+			columnCount = rsmd.getColumnCount();
+		
 			numFields = columnCount;
 		
 			DefaultTableModel model = (DefaultTableModel) table.getModel();
@@ -574,9 +566,10 @@ public class CookshareConnectionService {
 			}
 			
 			scrollPane.getViewport ().add (table);
-		} catch (SQLException e) {
-			e.printStackTrace();
 		}
+		catch (SQLException e) {
+			e.printStackTrace();
+		}		
 	}
 	
 	/**
