@@ -40,6 +40,7 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumnModel;
 
 import java.util.Random;
+import java.util.jar.JarEntry;
 
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
@@ -62,17 +63,20 @@ public class CookshareConnectionService {
 	private JTextField passBox;
 	private JTable table;
 	private JComboBox selectionMenu;
+	private JComboBox filterMenu;
 	private JFrame frameToDispose;
 	JScrollPane scrollPane;
 	private int numFields;
 	private ArrayList<String> fieldNames;
 	private ArrayList<JTextField> inputs = new ArrayList<JTextField>();
 	private String[] tableNames = {"Cuisine", "BelongsTo", "Dish", "Has", "Ingredients", "Recipe", "Reviews", "Steps", "User", "Uses", "Utensils"};
+	private String[] filters = {"All", "Dietary Type", "Cuisine"};
 	private String tableToAddTo;
 	String user = "juricar";
 	String pass = "Atsknktvegef24035526LCA!";
 	private String dbUsername;
 	private String dbPassword;
+	private JTextField filterValue;
 	
 	private static final Random RANDOM = new SecureRandom();
 	private static final Base64.Encoder enc = Base64.getEncoder();
@@ -241,6 +245,7 @@ public class CookshareConnectionService {
 										}
 									}
 										});
+								break;
 							case "Dish":
 								names.add("View Recipes");
 								names.add("View Recipes by dish type");
@@ -258,6 +263,14 @@ public class CookshareConnectionService {
 										frameToDispose.dispose();
 									}
 								});
+								break;
+							case "User":
+								names.add("View User's Recipes");
+								listeners.add(new ActionListener() {
+									public void actionPerformed (ActionEvent e){
+										//filterTables("Recipe", "User", table.getValueAt(table.getSelectedRow(), 1).toString());
+									}
+								});
 						}
 						contextMenu(names, listeners);
 					}
@@ -269,6 +282,13 @@ public class CookshareConnectionService {
 			tableList.setSelectedIndex(1);
 			this.selectionMenu = tableList;
 			
+			JComboBox filterList = new JComboBox(filters);
+			filterList.setSelectedIndex(0);
+			this.filterMenu = filterList;
+			
+			filterValue = new JTextField(25);
+			filterValue.setText("Enter Filter Value");
+			
 			JButton searchButton = new JButton("Search");
 			searchButton.addActionListener(new SearchButtonListener());
 			
@@ -278,10 +298,14 @@ public class CookshareConnectionService {
 			JButton deleteButton = new JButton("Delete");
 //			deleteButton.addActionListener(new DeleteButtonListener());
 			
+			
+			
 			topPanel.add(tableList, BorderLayout.WEST);
 			topPanel.add(searchButton, BorderLayout.EAST);
 			topPanel.add(addButton, BorderLayout.EAST);
 			topPanel.add(deleteButton, BorderLayout.EAST);
+			topPanel.add(filterList, BorderLayout.SOUTH);
+			topPanel.add(filterValue, BorderLayout.SOUTH);
 			panel.add(scrollPane, BorderLayout.CENTER);
 			frame.pack();
 			frame.setVisible(true);
@@ -470,15 +494,25 @@ public class CookshareConnectionService {
 		@Override
 		public void actionPerformed(ActionEvent arg0) {
 			try {
-//				query += "[" + String.valueOf(selectionMenu.getSelectedItem()) + "]";
-				CallableStatement cs = getConnection().prepareCall("{call search(?,?)}");
-				cs.setString(1, String.valueOf(selectionMenu.getSelectedItem()));
-				cs.setString(2, "");
-				cs.execute();
+				CallableStatement cs = null;
+				if(String.valueOf(filterMenu.getSelectedItem()).equals("All"))
+				{
+					cs = getConnection().prepareCall("{call search(?,?)}");
+					cs.setString(1, String.valueOf(selectionMenu.getSelectedItem()));
+					cs.setString(2, "");
+					cs.execute();
+				}
+				else
+				{
+					cs = getConnection().prepareCall("{call filter(?,?,?)}");
+					cs.setString(1, String.valueOf(selectionMenu.getSelectedItem()));
+					cs.setString(2, String.valueOf(filterMenu.getSelectedItem()));
+					cs.setString(3, String.valueOf(filterValue.getText()));
+					cs.execute();
+				}
+				//System.out.println("Made Query");
 				ResultSet rs = cs.getResultSet();
 				ResultSetMetaData rsmd = rs.getMetaData();
-				//System.out.println("Made Query");
-				
 				ArrayList<String> names = new ArrayList<String>();
 				int columnCount = rsmd.getColumnCount();
 				numFields = columnCount;
@@ -507,6 +541,7 @@ public class CookshareConnectionService {
 			}
 		}
 	}
+
 	
 	public void searchTables(String tableToSearch, String searchParam) {
 		try {
@@ -527,7 +562,6 @@ public class CookshareConnectionService {
 			for(int i = 0; i < columnCount; i++) {
 				names.add(rsmd.getColumnName(i+1));
 				model.addColumn(rsmd.getColumnName(i+1));
-				
 			}
 			fieldNames = names;
 			
