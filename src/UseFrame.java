@@ -511,13 +511,9 @@ public class UseFrame {
 		@Override
 		public void actionPerformed(ActionEvent arg0) {
 			tableToAddTo = String.valueOf(selectionMenu.getSelectedItem());
-			if(tableToAddTo.equals("Steps"))
+			if(tableToAddTo.equals("Steps") || tableToAddTo.equals("Reviews") || tableToAddTo.equals("Ingredients"))
 			{
-				JOptionPane.showMessageDialog(null, "You must add steps through the recipe view");
-			}
-			else if(tableToAddTo.equals("Reviews"))
-			{
-				JOptionPane.showMessageDialog(null, "You must add reviews through the recipe view");
+				JOptionPane.showMessageDialog(null, "You must add " + tableToAddTo.toLowerCase() + " through the recipe view");
 			}
 			else
 			{
