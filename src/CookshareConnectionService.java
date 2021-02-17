@@ -1,12 +1,10 @@
 import java.awt.BorderLayout;
-import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
-import java.sql.Array;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -14,33 +12,24 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Base64;
-import java.util.HashMap;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import javax.swing.plaf.basic.BasicOptionPaneUI;
-import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableColumnModel;
 
 import java.util.Random;
-import java.util.jar.JarEntry;
 
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
@@ -62,15 +51,15 @@ public class CookshareConnectionService {
 	private JTextField userBox;
 	private JTextField passBox;
 	private JTable table;
-	private JComboBox selectionMenu;
-	private JComboBox filterMenu;
+	private JComboBox<String> selectionMenu;
+	private JComboBox<String> filterMenu;
 	private JFrame frameToDispose;
 	JScrollPane scrollPane;
 	private int numFields;
 	private ArrayList<String> fieldNames;
 	private ArrayList<JTextField> inputs = new ArrayList<JTextField>();
 	private String[] tableNames = {"Cuisine", "BelongsTo", "Dish", "Has", "Ingredients", "Recipe", "Reviews", "Steps", "User", "Uses", "Utensils"};
-	private String[] filters = {"All", "Dietary Type", "Cuisine"};
+	private String[] filters = {"All"};
 	private String tableToAddTo;
 	String user = "juricar";
 	String pass = "Atsknktvegef24035526LCA!";
@@ -143,6 +132,50 @@ public class CookshareConnectionService {
 		if(this.useFrame != null) {
 			return;
 		}
+		
+		setupUI();
+		
+		searchTables("Recipe","");
+		
+		setupOnClick();
+		
+		setupFilters();
+		
+		return;
+	}
+	
+	public void setupFilters()
+	{
+		ArrayList<String> newFilters = new ArrayList<String>();
+		selectionMenu.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				newFilters.clear();
+				filterMenu.removeAllItems();
+				newFilters.add("All");
+				switch(selectionMenu.getSelectedItem().toString())
+				{
+					case "Dish":
+						newFilters.add("Name");
+						newFilters.add("Cuisine");
+						newFilters.add("Type");
+						break;
+					case "Recipe":
+						newFilters.add("Cuisine");
+						newFilters.add("Dietary Type");
+						break;
+					
+				}
+				for(int i = 0; i < newFilters.size(); i++)
+				{
+					filterMenu.insertItemAt(newFilters.get(i), i);
+				}
+			}
+	    });
+	}
+	
+	public void setupUI()
+	{
 		JFrame frame = new JFrame("Cookshare");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		createMenuBar(frame);
@@ -156,166 +189,151 @@ public class CookshareConnectionService {
 			this.inputFrame = null;
 			System.out.println("Cleanup");
 		}
+		
 		this.useFrame = frame;
 		
-		try {
-			CallableStatement cs = getConnection().prepareCall("{call search(?,?)}");
-			cs.setString(1, "BelongsTo");
-			cs.setString(2, "");
-			cs.execute();
-			ResultSet rs = cs.getResultSet();;
-			ResultSetMetaData rsmd = rs.getMetaData();
-			//System.out.println("Made Query");
-			
-			JTable table = new JTable(new DefaultTableModel());
-			ArrayList<String> names = new ArrayList<String>();
-			int columnCount = rsmd.getColumnCount();
-			numFields = columnCount;
+		JTable table = new JTable(new DefaultTableModel());
+		scrollPane = new JScrollPane(table);
 		
-			DefaultTableModel model = (DefaultTableModel) table.getModel();
-			model.setColumnCount(0);
-			model.setRowCount(0);
-			for(int i = 0; i < columnCount; i++) {
-				names.add(rsmd.getColumnName(i+1));
-				model.addColumn(rsmd.getColumnName(i+1));
+		this.table = table;
+		table.setDefaultEditor(Object.class, null);
+		table.getTableHeader().setReorderingAllowed(false); 
+		
+		JComboBox<String> tableList = new JComboBox<>(tableNames);
+		tableList.setSelectedIndex(1);
+		this.selectionMenu = tableList;
+		
+		JComboBox<String> filterList = new JComboBox<>(filters);
+		filterList.setSelectedIndex(0);
+		this.filterMenu = filterList;
+		
+		filterValue = new JTextField(25);
+		filterValue.setText("Enter Filter Value");
+		
+		JButton searchButton = new JButton("Search");
+		searchButton.addActionListener(new SearchButtonListener());
+		
+		JButton addButton = new JButton("Add");
+		addButton.addActionListener(new AddButtonListener());
+
+		topPanel.add(tableList, BorderLayout.WEST);
+		topPanel.add(searchButton, BorderLayout.EAST);
+		topPanel.add(addButton, BorderLayout.EAST);
+		topPanel.add(filterList, BorderLayout.SOUTH);
+		topPanel.add(filterValue, BorderLayout.SOUTH);
+		panel.add(scrollPane, BorderLayout.CENTER);
+		frame.pack();
+		frame.setVisible(true);
+	}
+	
+	void setupOnClick()
+	{
+		this.table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+			public void valueChanged(ListSelectionEvent event) {
+				ArrayList<String> names = new ArrayList<String>();
+				ArrayList<ActionListener> listeners = new ArrayList<ActionListener>();
+				if(event.getValueIsAdjusting() && table.getSelectedRow() != -1) {
+					switch(selectionMenu.getSelectedItem().toString()) {
+						case "Recipe":
+							names.add("View Steps");
+							names.add("Delete");
+							names.add("Add a step");
+							names.add("Add a review");
+							names.add("View reviews");
+							listeners.add(new ActionListener() {
+								public void actionPerformed (ActionEvent e) {
+									searchTables("Steps", table.getValueAt(table.getSelectedRow(), 0).toString());
+									selectionMenu.setSelectedIndex(7);
+									frameToDispose.dispose();
+								}
+							});
+							listeners.add(new ActionListener() {
+								public void actionPerformed (ActionEvent e) {
+									if (dbUsername.equals(table.getValueAt(table.getSelectedRow(), 4).toString())) {
+										try {
+											CallableStatement cs = getConnection().prepareCall("{call deleteRecipe(?,?)}");
+											cs.setString(1, table.getValueAt(table.getSelectedRow(), 0).toString());
+											cs.setString(2, dbUsername);
+											cs.execute();
+											searchTables("Recipe", "");
+										} catch (SQLException err) {
+											err.printStackTrace();
+										}
+										frameToDispose.dispose();
+									} else {
+										JOptionPane.showMessageDialog(null, "You cannot delete other user's recipes!");
+									}
+								}
+							});
+							listeners.add(new ActionListener() {									
+								public void actionPerformed (ActionEvent e){
+									if (dbUsername.equals(table.getValueAt(table.getSelectedRow(), 4).toString())) {
+										tableToAddTo = "Steps";
+										addFrame(tableToAddTo);
+										frameToDispose.dispose();
+									} else {
+										JOptionPane.showMessageDialog(null, "You cannot edit other user's recipes!");
+									}
+								}
+									});
+							listeners.add(new ActionListener() {
+								public void actionPerformed (ActionEvent e){
+									if (!dbUsername.equals(table.getValueAt(table.getSelectedRow(), 4).toString())) {
+										tableToAddTo = "Reviews";
+										addFrame(tableToAddTo);
+										frameToDispose.dispose();
+									} else {
+										JOptionPane.showMessageDialog(null, "You cannot review your own recipe!");
+									}
+								}
+							});
+							listeners.add(new ActionListener(){
+								public void actionPerformed (ActionEvent e){
+									searchTables("Reviews", table.getValueAt(table.getSelectedRow(), 0).toString());
+									frameToDispose.dispose();
+								}
+							});
+							break;
+						case "Dish":
+							names.add("View Recipes");
+							names.add("View Recipes by dish type");
+							listeners.add(new ActionListener() {
+								public void actionPerformed (ActionEvent e){
+									searchTables("Recipe", table.getValueAt(table.getSelectedRow(), 0).toString());
+									frameToDispose.dispose();
+								}
+							});
+							listeners.add(new ActionListener() {
+								public void actionPerformed (ActionEvent e){
+									searchTables("Recipe", table.getValueAt(table.getSelectedRow(), 2).toString());
+									frameToDispose.dispose();
+								}
+							});
+							break;
+						case "User":
+							names.add("View User's Recipes");
+							listeners.add(new ActionListener() {
+								public void actionPerformed (ActionEvent e){
+									filterTables("Recipe", "User", table.getValueAt(table.getSelectedRow(), 0).toString());
+									frameToDispose.dispose();
+								}
+							});
+							break;
+						case "Cuisine":
+							names.add("View Dishes");
+							listeners.add(new ActionListener() {
+								public void actionPerformed (ActionEvent e){
+									filterTables("Dish", "Cuisine", table.getValueAt(table.getSelectedRow(), 0).toString());
+									frameToDispose.dispose();
+								}
+							});
+							break;
+					}
+					contextMenu(names, listeners);
+				}
 				
 			}
-			fieldNames = names;
-			
-			while(rs.next()) {
-				Object[] data = new Object[names.size()];
-				for(int j = 0; j < names.size(); j++) {
-					data[j] = rs.getString(j+1);
-				}
-				model.addRow(data);
-			}
-			
-			
-			
-			scrollPane = new JScrollPane(table);
-			
-			this.table = table;
-			table.setDefaultEditor(Object.class, null);
-			table.getTableHeader().setReorderingAllowed(false); 
-			
-			//Big fancy listener that determines what the table does on-click
-			table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-				public void valueChanged(ListSelectionEvent event) {
-					ArrayList<String> names = new ArrayList<String>();
-					ArrayList<ActionListener> listeners = new ArrayList<ActionListener>();
-					if(event.getValueIsAdjusting() && table.getSelectedRow() != -1) {
-						switch(selectionMenu.getSelectedItem().toString()) {
-							case "Recipe":
-								names.add("View Steps");
-								names.add("Delete");
-								names.add("Add a step");
-								listeners.add(new ActionListener() {
-									public void actionPerformed (ActionEvent e) {
-										searchTables("Steps", table.getValueAt(table.getSelectedRow(), 0).toString());
-										selectionMenu.setSelectedIndex(7);
-										frameToDispose.dispose();
-									}
-								});
-								listeners.add(new ActionListener() {
-									public void actionPerformed (ActionEvent e) {
-										if (dbUsername.equals(table.getValueAt(table.getSelectedRow(), 4).toString())) {
-											try {
-												CallableStatement cs = getConnection().prepareCall("{call deleteRecipe(?,?)}");
-												cs.setString(1, table.getValueAt(table.getSelectedRow(), 0).toString());
-												cs.setString(2, dbUsername);
-												cs.execute();
-												searchTables("Recipe", "");
-											} catch (SQLException err) {
-												err.printStackTrace();
-											}
-											frameToDispose.dispose();
-										} else {
-											JOptionPane.showMessageDialog(null, "You cannot delete other user's recipes!");
-										}
-									}
-								});
-								listeners.add(new ActionListener() {									
-									public void actionPerformed (ActionEvent e){
-										if (dbUsername.equals(table.getValueAt(table.getSelectedRow(), 4).toString())) {
-											tableToAddTo = "Steps";
-											addFrame(tableToAddTo);
-											frameToDispose.dispose();
-										} else {
-											JOptionPane.showMessageDialog(null, "You cannot edit other user's recipes!");
-										}
-									}
-										});
-								break;
-							case "Dish":
-								names.add("View Recipes");
-								names.add("View Recipes by dish type");
-								listeners.add(new ActionListener() {
-									public void actionPerformed (ActionEvent e){
-										searchTables("Recipe", table.getValueAt(table.getSelectedRow(), 0).toString());
-										frameToDispose.dispose();
-									}
-								});
-								listeners.add(new ActionListener() {
-									public void actionPerformed (ActionEvent e){
-										searchTables("Recipe", table.getValueAt(table.getSelectedRow(), 2).toString());
-										frameToDispose.dispose();
-									}
-								});
-								break;
-							case "User":
-								names.add("View User's Recipes");
-								listeners.add(new ActionListener() {
-									public void actionPerformed (ActionEvent e){
-										filterTables("Recipe", "User", table.getValueAt(table.getSelectedRow(), 0).toString());
-										frameToDispose.dispose();
-									}
-								});
-						}
-						contextMenu(names, listeners);
-					}
-					
-				}
-			});
-			
-			JComboBox tableList = new JComboBox(tableNames);
-			tableList.setSelectedIndex(1);
-			this.selectionMenu = tableList;
-			
-			JComboBox filterList = new JComboBox(filters);
-			filterList.setSelectedIndex(0);
-			this.filterMenu = filterList;
-			
-			filterValue = new JTextField(25);
-			filterValue.setText("Enter Filter Value");
-			
-			JButton searchButton = new JButton("Search");
-			searchButton.addActionListener(new SearchButtonListener());
-			
-			JButton addButton = new JButton("Add");
-			addButton.addActionListener(new AddButtonListener());
-			
-			JButton deleteButton = new JButton("Delete");
-//			deleteButton.addActionListener(new DeleteButtonListener());
-			
-			
-			
-			topPanel.add(tableList, BorderLayout.WEST);
-			topPanel.add(searchButton, BorderLayout.EAST);
-			topPanel.add(addButton, BorderLayout.EAST);
-			topPanel.add(deleteButton, BorderLayout.EAST);
-			topPanel.add(filterList, BorderLayout.SOUTH);
-			topPanel.add(filterValue, BorderLayout.SOUTH);
-			panel.add(scrollPane, BorderLayout.CENTER);
-			frame.pack();
-			frame.setVisible(true);
-			//System.out.println("Returned");
-			return;
-		}
-		catch(SQLException e) {
-			System.out.println(e);
-			JOptionPane.showMessageDialog(null, "Failed to open use frame");
-		}
-		closeConnection();
+		});
 	}
 	
 	/**
@@ -482,7 +500,7 @@ public class CookshareConnectionService {
 		}
 
 	}
-
+	
 	/**
 	 * This button is attached to the 'Search' button, and executes the search when the button is hit.
 	 * @author juricar
@@ -586,6 +604,10 @@ public class CookshareConnectionService {
 			{
 				JOptionPane.showMessageDialog(null, "You must add steps through the recipe view");
 			}
+			else if(tableToAddTo.equals("Reviews"))
+			{
+				JOptionPane.showMessageDialog(null, "You must add reviews through the recipe view");
+			}
 			else
 			{
 				addFrame(tableToAddTo);
@@ -674,8 +696,10 @@ public class CookshareConnectionService {
 						cs.registerOutParameter(1, Types.INTEGER);
 						cs.setString(questionMarkIndex, dbUsername);
 						questionMarkIndex++;
+						cs.setInt(questionMarkIndex, Integer.parseInt((table.getValueAt(table.getSelectedRow(), 0)).toString()));
+						questionMarkIndex++;
 						for(int i = 0; i < inputs.size(); i++) {
-							if(i == 0 || i == 1) {
+							if(i == 0) {
 								cs.setInt(questionMarkIndex, Integer.parseInt(inputs.get(i).getText()));
 								questionMarkIndex++;
 							}
@@ -699,7 +723,7 @@ public class CookshareConnectionService {
 								questionMarkIndex++;
 							}
 						}
-						cs.setInt(questionMarkIndex, Integer.parseInt((table.getValueAt(table.getSelectedRow(), 4)).toString()));
+						cs.setInt(questionMarkIndex, Integer.parseInt((table.getValueAt(table.getSelectedRow(), 0)).toString()));
 						
 						cs.setString(questionMarkIndex, dbUsername);
 						break;
@@ -758,7 +782,7 @@ public class CookshareConnectionService {
 		for(int i = 0; i < this.fieldNames.size(); i++) {
 			if(!(this.fieldNames.get(i).equals("ID") || this.fieldNames.get(i).equals("UserID") 
 					|| this.fieldNames.get(i).equals("Username") || this.fieldNames.get(i).equals("Author") 
-					|| (tableToAddTo.equals("Steps") && this.fieldNames.get(i).equals("RecipeID")))) {
+					|| ((tableToAddTo.equals("Steps")|| tableToAddTo.equals("Reviews")) && this.fieldNames.get(i).equals("RecipeID")))) {
 				JTextField textBox = new JTextField(20);
 				textBox.setText(this.fieldNames.get(i));
 				panel.add(textBox);
