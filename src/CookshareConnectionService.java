@@ -226,7 +226,7 @@ public class CookshareConnectionService {
 		frame.setVisible(true);
 	}
 	
-	void setupOnClick()
+	void setupOnClick() // This function sets up the on click functionalities for various tables
 	{
 		this.table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
 			public void valueChanged(ListSelectionEvent event) {
