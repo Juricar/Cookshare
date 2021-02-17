@@ -32,7 +32,10 @@ public class ModifyFrame {
 		this.table = table2;
 		this.recipeID = CorrectRecipeID;
 	}
-	
+	/*
+	 This is just the AddFrame's code copied over.  Need to change this eventually. 
+	 
+	 */
 	public void open() {
 		JFrame frame = new JFrame();
 		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);

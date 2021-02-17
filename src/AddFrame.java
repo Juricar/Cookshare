@@ -175,10 +175,6 @@ public class AddFrame {
 						questionMarkIndex++;
 						
 						cs.setString(questionMarkIndex,  dbUsername);
-						
-//						cs.setInt(questionMarkIndex, Integer.parseInt((table.getValueAt(table.getSelectedRow(), 0)).toString()));
-//						
-//						cs.setString(questionMarkIndex, dbUsername);
 						break;
 					
 					case "Utensils":
@@ -188,7 +184,6 @@ public class AddFrame {
 						break;
 				}
 				cs.execute();
-//				System.out.println("Adding Dish complete!");
 				adderFrame.dispose();
 			} catch (SQLException e) {
 				System.out.println("Didn't work again.");
