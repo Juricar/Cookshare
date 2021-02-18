@@ -105,13 +105,13 @@ public class ModifyFrame {
 						questionMarkIndex++;
 						for(int i = 0; i < inputs.size(); i++) {
 							if(i == 0 || i == 2) {
-								cs.setString(questionMarkIndex, inputs.get(i).getText());
+								cs.setString(questionMarkIndex, sanitize(inputs.get(i).getText()));
 								questionMarkIndex++;
 							}
 							else if (i == 1){
 								if(inputs.get(i).getText().isEmpty())
 								{
-									cs.setString(questionMarkIndex, inputs.get(i).getText());
+									cs.setString(questionMarkIndex, sanitize(inputs.get(i).getText()));
 								}
 								else
 								{
@@ -139,7 +139,7 @@ public class ModifyFrame {
 								questionMarkIndex++;
 							}
 							else {
-								cs.setString(questionMarkIndex, inputs.get(i).getText());
+								cs.setString(questionMarkIndex, sanitize(inputs.get(i).getText()));
 								questionMarkIndex++;
 							}
 						}
@@ -156,7 +156,7 @@ public class ModifyFrame {
 								questionMarkIndex++;
 							} 
 							else {
-								cs.setString(questionMarkIndex, inputs.get(i).getText());
+								cs.setString(questionMarkIndex, sanitize(inputs.get(i).getText()));
 								questionMarkIndex++;
 							}
 							
@@ -172,5 +172,22 @@ public class ModifyFrame {
 			}
 			
 		}
+	}
+	
+	private String sanitize(String text) {
+		// TODO Auto-generated method stub
+		StringBuilder sanitizedString = new StringBuilder();
+		for(int i = 0; i < text.length(); i++)
+		{
+			if(text.charAt(i) == ';' || text.charAt(i) == '@' || text.charAt(i) == '#' || text.charAt(i) == '%')
+			{
+				sanitizedString.append(' ');
+			}
+			else
+			{
+				sanitizedString.append(text.charAt(i));
+			}
+		}
+		return sanitizedString.toString();
 	}
 }
