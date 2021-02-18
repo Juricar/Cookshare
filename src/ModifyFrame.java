@@ -153,36 +153,30 @@ public class ModifyFrame {
 //						}
 //						break;
 //					
-//					case "Steps":
-//						cs = con.prepareCall("{? = call addSteps(?,?,?,?)}");
-//						cs.registerOutParameter(1, Types.INTEGER);
-//						System.out.println(inputs.size());
-//						for(int i = 0; i < inputs.size(); i++) {
-//							if(i == 0) {
-//								cs.setInt(questionMarkIndex, Integer.parseInt(inputs.get(i).getText()));
-//								questionMarkIndex++;
-//							} 
-//							else {
-//								cs.setString(questionMarkIndex, inputs.get(i).getText());
-//								questionMarkIndex++;
-//							}
-//							
-//						}
-//						cs.setInt(questionMarkIndex, Integer.parseInt(table.getValueAt(table.getSelectedRow(), 0).toString()));
-//						questionMarkIndex++;
-//						
-//						cs.setString(questionMarkIndex,  dbUsername);
-//						
-////						cs.setInt(questionMarkIndex, Integer.parseInt((table.getValueAt(table.getSelectedRow(), 0)).toString()));
-////						
-////						cs.setString(questionMarkIndex, dbUsername);
-//						break;
-//					
-//					case "Utensils":
-//						cs = con.prepareCall("{? = call addUtensils(?)}");
-//						cs.registerOutParameter(1, Types.INTEGER);
-//						cs.setString(questionMarkIndex, inputs.get(0).getText());
-//						break;
+					case "Steps":
+						cs = con.prepareCall("{? = call modifySteps(?,?,?,?)}");
+						cs.registerOutParameter(1, Types.INTEGER);
+						cs.setInt(questionMarkIndex, IDToModify);
+						questionMarkIndex++;
+						for(int i = 0; i < inputs.size(); i++) {
+							if(i == 0) {
+								cs.setInt(questionMarkIndex, Integer.parseInt(inputs.get(i).getText()));
+								questionMarkIndex++;
+							} 
+							else {
+								cs.setString(questionMarkIndex, inputs.get(i).getText());
+								questionMarkIndex++;
+							}
+							
+						}
+						cs.setString(questionMarkIndex,  dbUsername);
+						break;
+					
+					case "Utensils":
+						cs = con.prepareCall("{? = call addUtensils(?)}");
+						cs.registerOutParameter(1, Types.INTEGER);
+						cs.setString(questionMarkIndex, inputs.get(0).getText());
+						break;
 				}
 				cs.execute();
 //				System.out.println("Adding Dish complete!");

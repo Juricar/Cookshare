@@ -255,6 +255,15 @@ public class UseFrame {
 								}
 							});
 							break;
+						case "Steps":
+							names.add("Edit Step");
+							listeners.add(new ActionListener() {
+								public void actionPerformed (ActionEvent e) {
+									int stepIDToModify = Integer.parseInt((table.getValueAt(table.getSelectedRow(), 0)).toString());
+									modifyFrame("Steps", stepIDToModify);
+								}
+							});
+							break;
 					}
 					contextMenu(names, listeners);
 				}
