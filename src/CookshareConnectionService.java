@@ -229,6 +229,11 @@ public class CookshareConnectionService {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			dbUsername = userBox.getText();
+			if(dbUsername.contains(";") || dbUsername.contains("@") || dbUsername.contains("#") || dbUsername.contains("%") || dbUsername.contains(" "))
+			{
+				JOptionPane.showMessageDialog(null, "Registration failed, the username must not contain any special characters");
+				return;
+			}
 			dbPassword = passBox.getText();
 			byte[] salt = getNewSalt();
 			String hPwd = hashPassword(salt, dbPassword);

@@ -82,7 +82,7 @@ public class AddFrame {
 						cs = con.prepareCall("{? = call addDish(?,?,?)}");
 						cs.registerOutParameter(1, Types.INTEGER);
 						for(int i = 0; i < inputs.size(); i++) {
-							cs.setString(questionMarkIndex, inputs.get(i).getText());
+							cs.setString(questionMarkIndex, sanitize(inputs.get(i).getText()));
 							questionMarkIndex++;
 						}
 						break;
@@ -100,7 +100,7 @@ public class AddFrame {
 						cs = con.prepareCall("{? = call addIngredients(?,?,?)}");
 						cs.registerOutParameter(1, Types.INTEGER);
 						for(int i = 0; i < inputs.size(); i++) {
-							cs.setString(questionMarkIndex, inputs.get(i).getText());
+							cs.setString(questionMarkIndex, sanitize(inputs.get(i).getText()));
 							questionMarkIndex++;
 						}
 						cs.setInt(questionMarkIndex, Integer.parseInt((table.getValueAt(table.getSelectedRow(), 0)).toString()));
@@ -112,7 +112,7 @@ public class AddFrame {
 
 						for(int i = 0; i < inputs.size(); i++) {
 							if(i == 0 || i == 1) {
-								cs.setString(questionMarkIndex, inputs.get(i).getText());
+								cs.setString(questionMarkIndex, sanitize(inputs.get(i).getText()));
 								questionMarkIndex++;
 							}
 							else if(i == 3)
@@ -129,7 +129,7 @@ public class AddFrame {
 							else if (i == 2 ){
 								if(inputs.get(i).getText().isEmpty())
 								{
-									cs.setString(questionMarkIndex, inputs.get(i).getText());
+									cs.setString(questionMarkIndex, sanitize(inputs.get(i).getText()));
 								}
 								else
 								{
@@ -166,7 +166,7 @@ public class AddFrame {
 								questionMarkIndex++;
 							}
 							else {
-								cs.setString(questionMarkIndex, inputs.get(i).getText());
+								cs.setString(questionMarkIndex, sanitize(inputs.get(i).getText()));
 								questionMarkIndex++;
 							}
 						}
@@ -182,7 +182,7 @@ public class AddFrame {
 								questionMarkIndex++;
 							} 
 							else {
-								cs.setString(questionMarkIndex, inputs.get(i).getText());
+								cs.setString(questionMarkIndex, sanitize(inputs.get(i).getText()));
 								questionMarkIndex++;
 							}
 							
@@ -196,16 +196,16 @@ public class AddFrame {
 					case "Utensils":
 						cs = con.prepareCall("{? = call addUtensils(?)}");
 						cs.registerOutParameter(1, Types.INTEGER);
-						cs.setString(questionMarkIndex, inputs.get(0).getText());
+						cs.setString(questionMarkIndex, sanitize(inputs.get(0).getText()));
 						break;
 					case "Cuisine":
 						cs = con.prepareCall("{? = call addCuisine(?)}");
 						cs.registerOutParameter(1, Types.INTEGER);
-						cs.setString(questionMarkIndex, inputs.get(0).getText());
+						cs.setString(questionMarkIndex, sanitize(inputs.get(0).getText()));
 					case "Uses":
 						cs = con.prepareCall("{? = call addUses(?,?)}");
 						cs.registerOutParameter(1, Types.INTEGER);
-						cs.setString(questionMarkIndex, inputs.get(0).getText());
+						cs.setString(questionMarkIndex, sanitize(inputs.get(0).getText()));
 						questionMarkIndex++;
 						cs.setInt(questionMarkIndex, Integer.parseInt(table.getValueAt(table.getSelectedRow(), 0).toString()));
 				}
@@ -215,6 +215,23 @@ public class AddFrame {
 				JOptionPane.showMessageDialog(null, "Something went wrong");
 			}
 			
+		}
+
+		private String sanitize(String text) {
+			// TODO Auto-generated method stub
+			StringBuilder sanitizedString = new StringBuilder();
+			for(int i = 0; i < text.length(); i++)
+			{
+				if(text.charAt(i) == ';' || text.charAt(i) == '@' || text.charAt(i) == '#' || text.charAt(i) == '%')
+				{
+					sanitizedString.append(' ');
+				}
+				else
+				{
+					sanitizedString.append(text.charAt(i));
+				}
+			}
+			return sanitizedString.toString();
 		}
 
 		private boolean checkInTable(String tableName, String entry) {
