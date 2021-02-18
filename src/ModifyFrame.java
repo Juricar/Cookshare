@@ -131,7 +131,7 @@ public class ModifyFrame {
 						cs.registerOutParameter(1, Types.INTEGER);
 						cs.setString(questionMarkIndex, dbUsername);
 						questionMarkIndex++;
-						cs.setInt(questionMarkIndex, Integer.parseInt((table.getValueAt(table.getSelectedRow(), 0)).toString()));
+						cs.setInt(questionMarkIndex, Integer.parseInt((table.getValueAt(table.getSelectedRow(), 1)).toString()));
 						questionMarkIndex++;
 						for(int i = 0; i < inputs.size(); i++) {
 							if(i == 0) {
