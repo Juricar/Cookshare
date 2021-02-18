@@ -15,7 +15,7 @@ public class Importer {
 	private String file;
 	private CookshareConnectionService db;
 	private Connection c;
-	private final String dbName = "Cookshare2";
+	private final String dbName = "Cookshare4";
 	private final String serverName = "titan.csse.rose-hulman.edu";
 	
 	public static void main(String[] args) {
@@ -23,7 +23,7 @@ public class Importer {
 	}
 	
 	public Importer() {
-		this.file = "c:/cookdb.txt";
+		this.file = "src/cookdb.txt";
 		db = new CookshareConnectionService(serverName, dbName);
 		db.connect("juricar", "Atsknktvegef24035526LCA!");
 		c = db.getConnection();

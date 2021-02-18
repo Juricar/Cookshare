@@ -1,0 +1,501 @@
+Recipe:~Bombastic Chocolate Cake
+Cuisine:~American
+Dish:~Chocolate Cake
+DishType:~Cake
+Ingredients:~Butter~Dairy~Broccoli~Vegetable~Black Pepper~Seasoning~Salmon~Fish~Apple~Fruit
+Utensil:~Grill
+Steps:~Let cook for 11 minutes.~Defrost.
+Diet:~Vegan
+Calories:~516
+---~
+Recipe:~Raw Donuts
+Cuisine:~Italian
+Dish:~Donuts
+DishType:~Dessert
+Ingredients:~Broccoli~Vegetable~Chicken Stock~Stock/Broth~Apple~Fruit
+Utensil:~Frying Pan
+Steps:~Preheat oven to 219.~Let cook for 26 minutes.~Cook in pan until golden-brown.~Beat eggs until all yolks are broken.
+Diet:~Non-Vegetarian
+Calories:~584
+---~
+Recipe:~Cheesy Blueberry Muffin
+Cuisine:~American
+Dish:~Blueberry Muffin
+DishType:~Muffin
+Ingredients:~Green Beans~Vegetable~Olive Oil~Oil~Salmon~Fish
+Utensil:~Frying Pan
+Steps:~Defrost.
+Diet:~Liquid
+Calories:~287
+---~
+Recipe:~Cheesy Butter Chicken
+Cuisine:~European
+Dish:~Butter Chicken
+DishType:~Chicken
+Ingredients:~Broccoli~Vegetable~Sriracha~Hot Sauce~Apple~Fruit~Butter~Dairy~Salt~Seasoning
+Utensil:~Grill
+Steps:~Place in oven.
+Diet:~Vegetarian
+Calories:~106
+---~
+Recipe:~Grilled Pepperoni Pizza
+Cuisine:~Mexican
+Dish:~Pepperoni Pizza
+DishType:~Pizza
+Ingredients:~Paprika~Spice~Onion Powder~Seasoning~Spoon~Utensil
+Utensil:~Glass Dish
+Steps:~Remove from freezer.~Soak in oil.~Garnish and serve.~Place in freezer.
+Diet:~Liquid
+Calories:~394
+---~
+Recipe:~Boring Fried Chicken
+Cuisine:~Italian
+Dish:~Fried Chicken
+DishType:~Chicken
+Ingredients:~Broccoli~Vegetable
+Utensil:~Pot
+Steps:~Add remaining cheese.~Add pepper to taste.~Flambe.~Contemplate life choices.
+Diet:~Liquid
+Calories:~609
+---~
+Recipe:~Cold Pepperoni Pizza
+Cuisine:~American
+Dish:~Pepperoni Pizza
+DishType:~Pizza
+Ingredients:~Spoon~Utensil
+Utensil:~Frying Pan
+Steps:~Defrost.~Place in blender.~Lightly season with salt.
+Diet:~Liquid
+Calories:~595
+---~
+Recipe:~Grilled Tacos
+Cuisine:~Mexican
+Dish:~Tacos
+DishType:~Unknown
+Ingredients:~Chicken Stock~Stock/Broth
+Utensil:~Frying Pan
+Steps:~Preheat oven to 254.~Cook in pan until golden-brown.~Contemplate life choices.
+Diet:~Vegan
+Calories:~888
+---~
+Recipe:~Stuffed Fried Chicken
+Cuisine:~Indian
+Dish:~Fried Chicken
+DishType:~Chicken
+Ingredients:~Paprika~Spice~Sour Cream~Dairy~Black Pepper~Seasoning~Chicken Stock~Stock/Broth
+Utensil:~Glass Dish
+Steps:~Place in freezer.~Garnish and serve.
+Diet:~Non-Vegetarian
+Calories:~242
+---~
+Recipe:~Juicy Banana Bread
+Cuisine:~American
+Dish:~Banana Bread
+DishType:~Dessert
+Ingredients:~Broccoli~Vegetable
+Utensil:~Glass Dish
+Steps:~Contemplate life choices.
+Diet:~Liquid
+Calories:~494
+---~
+Recipe:~Garden-Fresh Ice Cream
+Cuisine:~European
+Dish:~Ice Cream
+DishType:~Dessert
+Ingredients:~Butter~Dairy~Carrot~Vegetable~Sour Cream~Dairy
+Utensil:~Pot
+Steps:~Defrost.
+Diet:~Non-Vegetarian
+Calories:~971
+---~
+Recipe:~Tender Omelette
+Cuisine:~European
+Dish:~Omelette
+DishType:~Breakfast
+Ingredients:~Chicken Stock~Stock/Broth~Apple~Fruit~Paprika~Spice
+Utensil:~Pot
+Steps:~Preheat oven to 193.~Cook in pan until golden-brown.
+Diet:~Vegan
+Calories:~209
+---~
+Recipe:~Grilled Pork Chops
+Cuisine:~Mexican
+Dish:~Pork Chops
+DishType:~Pork
+Ingredients:~Chicken Stock~Stock/Broth~Broccoli~Vegetable~Sour Cream~Dairy~Salmon~Fish~Onion Powder~Seasoning~Black Pepper~Seasoning
+Utensil:~Pot
+Steps:~Garnish and serve.~Place in oven.~Lightly season with salt.
+Diet:~Liquid
+Calories:~960
+---~
+Recipe:~Satisfying Grilled Chicken
+Cuisine:~Other
+Dish:~Grilled Chicken
+DishType:~Chicken
+Ingredients:~Olive Oil~Oil~Sour Cream~Dairy~Salt~Seasoning~Broccoli~Vegetable
+Utensil:~Frying Pan
+Steps:~Preheat oven to 396.~Add pepper to taste.
+Diet:~Vegetarian
+Calories:~783
+---~
+Recipe:~Juicy Butter Chicken
+Cuisine:~European
+Dish:~Butter Chicken
+DishType:~Chicken
+Ingredients:~Butter~Dairy~Sour Cream~Dairy
+Utensil:~Grill
+Steps:~Lightly season with salt.~Preheat oven to 361.
+Diet:~Vegetarian
+Calories:~230
+---~
+Recipe:~Juicy Omelette
+Cuisine:~Indian
+Dish:~Omelette
+DishType:~Breakfast
+Ingredients:~Chicken Stock~Stock/Broth~Sriracha~Hot Sauce
+Utensil:~Frying Pan
+Steps:~Place in freezer.~Let cook for 15 minutes.~Remove from freezer.~Preheat oven to 205.
+Diet:~Liquid
+Calories:~588
+---~
+Recipe:~Medium-well Pork Chops
+Cuisine:~Italian
+Dish:~Pork Chops
+DishType:~Pork
+Ingredients:~Olive Oil~Oil
+Utensil:~Frying Pan
+Steps:~Beat eggs until all yolks are broken.
+Diet:~Non-Vegetarian
+Calories:~174
+---~
+Recipe:~Stuffed Tacos
+Cuisine:~Mexican
+Dish:~Tacos
+DishType:~Unknown
+Ingredients:~Chicken Stock~Stock/Broth~Spoon~Utensil~Sriracha~Hot Sauce
+Utensil:~Grill
+Steps:~Lightly season with salt.~Flambe.
+Diet:~Vegetarian
+Calories:~436
+---~
+Recipe:~Delicious Chocolate Cake
+Cuisine:~Other
+Dish:~Chocolate Cake
+DishType:~Cake
+Ingredients:~Carrot~Vegetable~Sour Cream~Dairy~Onion Powder~Seasoning~Lemon~Fruit~Chicken Stock~Stock/Broth
+Utensil:~Grill
+Steps:~Lightly season with salt.~Add remaining cheese.
+Diet:~Liquid
+Calories:~422
+---~
+Recipe:~Boring Ice Cream
+Cuisine:~Indian
+Dish:~Ice Cream
+DishType:~Dessert
+Ingredients:~Lemon~Fruit~Sriracha~Hot Sauce~Broccoli~Vegetable~Apple~Fruit
+Utensil:~Glass Dish
+Steps:~Cook in pan until golden-brown.~Flambe.~Place in blender.
+Diet:~Vegetarian
+Calories:~971
+---~
+Recipe:~Garden-Fresh Fried Chicken
+Cuisine:~European
+Dish:~Fried Chicken
+DishType:~Chicken
+Ingredients:~Spoon~Utensil~Onion Powder~Seasoning~Salmon~Fish~Black Pepper~Seasoning
+Utensil:~Frying Pan
+Steps:~Defrost.
+Diet:~Vegetarian
+Calories:~693
+---~
+Recipe:~Spicy Donuts
+Cuisine:~Indian
+Dish:~Donuts
+DishType:~Dessert
+Ingredients:~Apple~Fruit~Carrot~Vegetable~Sour Cream~Dairy~Broccoli~Vegetable~Spoon~Utensil
+Utensil:~Grill
+Steps:~Garnish and serve.
+Diet:~Vegan
+Calories:~973
+---~
+Recipe:~Burnt Fried Chicken
+Cuisine:~Indian
+Dish:~Fried Chicken
+DishType:~Chicken
+Ingredients:~Sriracha~Hot Sauce
+Utensil:~Pot
+Steps:~Place in blender.~Flambe.~Lightly season with salt.
+Diet:~Non-Vegetarian
+Calories:~53
+---~
+Recipe:~Savory Omelette
+Cuisine:~Indian
+Dish:~Omelette
+DishType:~Breakfast
+Ingredients:~Onion Powder~Seasoning~Paprika~Spice
+Utensil:~Pot
+Steps:~Garnish and serve.~Contemplate life choices.
+Diet:~Liquid
+Calories:~190
+---~
+Recipe:~Cheesy Chocolate Cake
+Cuisine:~Italian
+Dish:~Chocolate Cake
+DishType:~Cake
+Ingredients:~Salt~Seasoning
+Utensil:~Grill
+Steps:~Place in freezer.~Add pepper to taste.~Soak in oil.
+Diet:~Liquid
+Calories:~750
+---~
+Recipe:~Salty Butter Chicken
+Cuisine:~European
+Dish:~Butter Chicken
+DishType:~Chicken
+Ingredients:~Onion Powder~Seasoning~Apple~Fruit~Green Beans~Vegetable~Salt~Seasoning~Lemon~Fruit
+Utensil:~Frying Pan
+Steps:~Place in oven.~Place in blender.~Contemplate life choices.~Defrost.
+Diet:~Vegetarian
+Calories:~838
+---~
+Recipe:~Satisfying Tacos
+Cuisine:~Indian
+Dish:~Tacos
+DishType:~Unknown
+Ingredients:~Sriracha~Hot Sauce~Green Beans~Vegetable~Salmon~Fish~Lemon~Fruit
+Utensil:~Grill
+Steps:~Preheat oven to 177.~Contemplate life choices.
+Diet:~Non-Vegetarian
+Calories:~834
+---~
+Recipe:~Bombastic Banana Bread
+Cuisine:~European
+Dish:~Banana Bread
+DishType:~Dessert
+Ingredients:~Lemon~Fruit~Salmon~Fish~Apple~Fruit~Onion Powder~Seasoning
+Utensil:~Grill
+Steps:~Preheat oven to 187.~Cook in pan until golden-brown.
+Diet:~Non-Vegetarian
+Calories:~761
+---~
+Recipe:~Salivating Tacos
+Cuisine:~Mexican
+Dish:~Tacos
+DishType:~Unknown
+Ingredients:~Carrot~Vegetable
+Utensil:~Grill
+Steps:~Cook in pan until golden-brown.
+Diet:~Vegan
+Calories:~260
+---~
+Recipe:~Bombastic Cheese Pizza
+Cuisine:~American
+Dish:~Cheese Pizza
+DishType:~Pizza
+Ingredients:~Broccoli~Vegetable
+Utensil:~Grill
+Steps:~Contemplate life choices.~Preheat oven to 203.
+Diet:~Liquid
+Calories:~604
+---~
+Recipe:~Boring Tacos
+Cuisine:~American
+Dish:~Tacos
+DishType:~Unknown
+Ingredients:~Onion Powder~Seasoning~Apple~Fruit~Sour Cream~Dairy
+Utensil:~Grill
+Steps:~Lightly season with salt.~Preheat oven to 309.
+Diet:~Vegan
+Calories:~157
+---~
+Recipe:~Cold Ice Cream
+Cuisine:~Mexican
+Dish:~Ice Cream
+DishType:~Dessert
+Ingredients:~Apple~Fruit~Salt~Seasoning~Butter~Dairy
+Utensil:~Pot
+Steps:~Flambe.
+Diet:~Vegetarian
+Calories:~991
+---~
+Recipe:~Bombastic Pork Chops
+Cuisine:~European
+Dish:~Pork Chops
+DishType:~Pork
+Ingredients:~Onion Powder~Seasoning~Paprika~Spice~Sriracha~Hot Sauce
+Utensil:~Grill
+Steps:~Add pepper to taste.~Soak in oil.~Add remaining cheese.~Lightly season with salt.
+Diet:~Liquid
+Calories:~274
+---~
+Recipe:~Savory Blueberry Muffin
+Cuisine:~Other
+Dish:~Blueberry Muffin
+DishType:~Muffin
+Ingredients:~Lemon~Fruit~Sour Cream~Dairy~Carrot~Vegetable
+Utensil:~Grill
+Steps:~Remove from freezer.~Lightly season with salt.~Soak in oil.
+Diet:~Liquid
+Calories:~725
+---~
+Recipe:~Salivating Donuts
+Cuisine:~Italian
+Dish:~Donuts
+DishType:~Dessert
+Ingredients:~Apple~Fruit
+Utensil:~Glass Dish
+Steps:~Cook in pan until golden-brown.
+Diet:~Non-Vegetarian
+Calories:~870
+---~
+Recipe:~Juicy Banana Bread
+Cuisine:~Indian
+Dish:~Banana Bread
+DishType:~Dessert
+Ingredients:~Butter~Dairy~Carrot~Vegetable~Apple~Fruit~Salmon~Fish
+Utensil:~Grill
+Steps:~Lightly season with salt.
+Diet:~Non-Vegetarian
+Calories:~853
+---~
+Recipe:~Juicy Blueberry Muffin
+Cuisine:~Other
+Dish:~Blueberry Muffin
+DishType:~Muffin
+Ingredients:~Salmon~Fish~Sour Cream~Dairy~Onion Powder~Seasoning
+Utensil:~Pot
+Steps:~Remove from freezer.
+Diet:~Vegetarian
+Calories:~578
+---~
+Recipe:~Garden-Fresh Ice Cream
+Cuisine:~Indian
+Dish:~Ice Cream
+DishType:~Dessert
+Ingredients:~Salt~Seasoning~Lemon~Fruit~Butter~Dairy~Sour Cream~Dairy~Salmon~Fish
+Utensil:~Pot
+Steps:~Cook in pan until golden-brown.~Remove from freezer.~Flambe.
+Diet:~Non-Vegetarian
+Calories:~573
+---~
+Recipe:~Juicy Blueberry Muffin
+Cuisine:~Mexican
+Dish:~Blueberry Muffin
+DishType:~Muffin
+Ingredients:~Carrot~Vegetable~Broccoli~Vegetable~Sriracha~Hot Sauce
+Utensil:~Glass Dish
+Steps:~Let cook for 20 minutes.~Defrost.
+Diet:~Vegan
+Calories:~949
+---~
+Recipe:~Cold Ice Cream
+Cuisine:~Other
+Dish:~Ice Cream
+DishType:~Dessert
+Ingredients:~Apple~Fruit
+Utensil:~Pot
+Steps:~Remove from freezer.~Cook in pan until golden-brown.
+Diet:~Vegan
+Calories:~294
+---~
+Recipe:~Grilled Grilled Chicken
+Cuisine:~Italian
+Dish:~Grilled Chicken
+DishType:~Chicken
+Ingredients:~Spoon~Utensil~Butter~Dairy~Green Beans~Vegetable~Sriracha~Hot Sauce
+Utensil:~Grill
+Steps:~Contemplate life choices.~Remove from freezer.~Let cook for 8 minutes.
+Diet:~Non-Vegetarian
+Calories:~629
+---~
+Recipe:~Juicy Ice Cream
+Cuisine:~Italian
+Dish:~Ice Cream
+DishType:~Dessert
+Ingredients:~Chicken Stock~Stock/Broth~Onion Powder~Seasoning~Lemon~Fruit
+Utensil:~Glass Dish
+Steps:~Add remaining cheese.
+Diet:~Vegetarian
+Calories:~711
+---~
+Recipe:~Crusty Blueberry Muffin
+Cuisine:~European
+Dish:~Blueberry Muffin
+DishType:~Muffin
+Ingredients:~Butter~Dairy~Sriracha~Hot Sauce
+Utensil:~Grill
+Steps:~Flambe.~Place in oven.
+Diet:~Vegetarian
+Calories:~301
+---~
+Recipe:~Grilled Banana Bread
+Cuisine:~Indian
+Dish:~Banana Bread
+DishType:~Dessert
+Ingredients:~Butter~Dairy~Carrot~Vegetable~Salt~Seasoning~Onion Powder~Seasoning~Spoon~Utensil~Broccoli~Vegetable
+Utensil:~Glass Dish
+Steps:~Add remaining cheese.~Contemplate life choices.
+Diet:~Vegetarian
+Calories:~670
+---~
+Recipe:~Medium-well Butter Chicken
+Cuisine:~European
+Dish:~Butter Chicken
+DishType:~Chicken
+Ingredients:~Salmon~Fish~Chicken Stock~Stock/Broth~Broccoli~Vegetable~Olive Oil~Oil
+Utensil:~Glass Dish
+Steps:~Cook in pan until golden-brown.
+Diet:~Vegetarian
+Calories:~814
+---~
+Recipe:~Juicy Banana Bread
+Cuisine:~Indian
+Dish:~Banana Bread
+DishType:~Dessert
+Ingredients:~Butter~Dairy~Spoon~Utensil~Paprika~Spice~Salt~Seasoning
+Utensil:~Pot
+Steps:~Preheat oven to 204.
+Diet:~Vegan
+Calories:~794
+---~
+Recipe:~Cheesy Pepperoni Pizza
+Cuisine:~European
+Dish:~Pepperoni Pizza
+DishType:~Pizza
+Ingredients:~Butter~Dairy
+Utensil:~Frying Pan
+Steps:~Place in oven.~Add pepper to taste.
+Diet:~Vegetarian
+Calories:~307
+---~
+Recipe:~Cheesy Grilled Chicken
+Cuisine:~Indian
+Dish:~Grilled Chicken
+DishType:~Chicken
+Ingredients:~Salmon~Fish~Butter~Dairy~Paprika~Spice~Broccoli~Vegetable
+Utensil:~Glass Dish
+Steps:~Lightly season with salt.~Beat eggs until all yolks are broken.~Garnish and serve.~Place in blender.
+Diet:~Non-Vegetarian
+Calories:~810
+---~
+Recipe:~Bombastic Donuts
+Cuisine:~American
+Dish:~Donuts
+DishType:~Dessert
+Ingredients:~Onion Powder~Seasoning~Apple~Fruit~Paprika~Spice~Green Beans~Vegetable~Carrot~Vegetable
+Utensil:~Frying Pan
+Steps:~Place in freezer.
+Diet:~Non-Vegetarian
+Calories:~464
+---~
+Recipe:~Delicious Donuts
+Cuisine:~American
+Dish:~Donuts
+DishType:~Dessert
+Ingredients:~Olive Oil~Oil~Broccoli~Vegetable~Salmon~Fish
+Utensil:~Glass Dish
+Steps:~Preheat oven to 175.~Contemplate life choices.~Place in oven.
+Diet:~Liquid
+Calories:~543
+---~
+***
