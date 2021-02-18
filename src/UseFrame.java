@@ -113,14 +113,16 @@ public class UseFrame {
 				if(event.getValueIsAdjusting() && table.getSelectedRow() != -1) {
 					switch(selectionMenu.getSelectedItem().toString()) {
 						case "Recipe":
-							names.add("View Steps");
+							names.add("View steps");
 							names.add("Delete");
 							names.add("Add a step");
 							names.add("Add a review");
 							names.add("View reviews");
 							names.add("Edit recipe");
 							names.add("Add an ingredient");
-							names.add("View Ingredients");
+							names.add("View ingredients");
+							names.add("View utensils");
+							names.add("Add a utensil");
 							listeners.add(new ActionListener() {
 								public void actionPerformed (ActionEvent e) {
 									searchTables("Steps", table.getValueAt(table.getSelectedRow(), 0).toString());
@@ -149,8 +151,7 @@ public class UseFrame {
 							listeners.add(new ActionListener() {									
 								public void actionPerformed (ActionEvent e){
 									if (dbUsername.equals(table.getValueAt(table.getSelectedRow(), 4).toString())) {
-										tableToAddTo = "Steps";
-										addFrame(tableToAddTo);
+										addFrame("Steps");
 										frameToDispose.dispose();
 									} else {
 										JOptionPane.showMessageDialog(null, "You cannot edit other user's recipes!");
@@ -160,8 +161,7 @@ public class UseFrame {
 							listeners.add(new ActionListener() {
 								public void actionPerformed (ActionEvent e){
 									if (!dbUsername.equals(table.getValueAt(table.getSelectedRow(), 4).toString())) {
-										tableToAddTo = "Reviews";
-										addFrame(tableToAddTo);
+										addFrame("Reviews");
 										frameToDispose.dispose();
 									} else {
 										JOptionPane.showMessageDialog(null, "You cannot review your own recipe!");
@@ -176,17 +176,20 @@ public class UseFrame {
 							});
 							listeners.add(new ActionListener() {
 								public void actionPerformed (ActionEvent e) {
-//									searchTables("Reviews", "");
-									tableToModify = "Recipe";
-									int recipeIDToModify = (int) table.getValueAt(table.getSelectedRow(), 0);
-//									modifyFrame(tableToModify, recipeIDToModify);
+									if(dbUsername.equals(table.getValueAt(table.getSelectedRow(), 4).toString()))
+									{
+										int recipeIDToModify = Integer.parseInt((table.getValueAt(table.getSelectedRow(), 0)).toString());
+										modifyFrame("Recipe", recipeIDToModify);
+									}
+									else {
+										JOptionPane.showMessageDialog(null, "You can't edit another user's recipe!");
+									}
 								}
 							});
 							listeners.add(new ActionListener() {
 								public void actionPerformed(ActionEvent e) {
 									if(dbUsername.equals(table.getValueAt(table.getSelectedRow(), 4).toString())) {
-										tableToAddTo = "Ingredients";
-										addFrame(tableToAddTo);
+										addFrame("Ingredients");
 										frameToDispose.dispose();
 									} else {
 										JOptionPane.showMessageDialog(null, "You can't add ingredients to another user's recipe!");
@@ -200,8 +203,23 @@ public class UseFrame {
 									frameToDispose.dispose();
 								}
 							});
-							
-							
+							listeners.add(new ActionListener() {
+								public void actionPerformed (ActionEvent e) {
+									filterTables("Utensils", "RecipeID", table.getValueAt(table.getSelectedRow(), 0).toString());
+									selectionMenu.setSelectedIndex(10);
+									frameToDispose.dispose();
+								}
+							});
+							listeners.add(new ActionListener() {
+								public void actionPerformed(ActionEvent e) {
+									if(dbUsername.equals(table.getValueAt(table.getSelectedRow(), 4).toString())) {
+										addFrame("Uses");
+										frameToDispose.dispose();
+									} else {
+										JOptionPane.showMessageDialog(null, "You can't add ingredients to another user's recipe!");
+									}
+								}
+							});
 							break;
 						case "Dish":
 							names.add("View Recipes");
@@ -265,7 +283,10 @@ public class UseFrame {
 						newFilters.add("Cuisine");
 						newFilters.add("Dietary Type");
 						break;
-					
+					case "Reviews":
+						newFilters.add("Rating greater than");
+						newFilters.add("Rating less than");
+						newFilters.add("Rating equals");
 				}
 				for(int i = 0; i < newFilters.size(); i++)
 				{
@@ -362,11 +383,11 @@ public class UseFrame {
 		}
 	}
 	
-	private void addFrame(String tableToAddTo) {
-		
+	public void setupFields(String table)
+	{
 		try {
 			CallableStatement cs = con.prepareCall("{call search(?,?)}");
-			cs.setString(1, tableToAddTo);
+			cs.setString(1, table);
 			cs.setString(2, "");
 			cs.execute();
 			ResultSet rs = cs.getResultSet();
@@ -381,23 +402,40 @@ public class UseFrame {
 				{
 					names.add("DishName");
 				}
+				else if(rsmd.getColumnName(i+1).equals("UtensilID"))
+				{
+					names.add("UtensilName");
+				}
 				else
 				{
 					names.add(rsmd.getColumnName(i+1));					
 				}
 			}
-			if(tableToAddTo.equals("Dish")) names.add("Cuisine Type");
+			if(table.equals("Dish")) names.add("Cuisine Type");
 			fieldNames = names;
-			if(tableToAddTo.equals("Ingredients")) names.add("RecipeID");
+			if(table.equals("Ingredients")) names.add("RecipeID");
 			fieldNames = names;
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		
+	}
+	
+	public void modifyFrame(String tableToModify, int IDToModify)
+	{
+		setupFields(tableToModify);
 		inputs.clear();
-		AddFrame frame = new AddFrame(this.dbUsername, this.con, this.fieldNames, this.tableToAddTo, this.inputs, this.table);
+		ModifyFrame frame = new ModifyFrame(this.dbUsername, this.con, this.fieldNames, tableToModify, new ArrayList<JTextField>(), this.table, IDToModify);
 		frame.open();
 	}
+	
+	public void addFrame(String tableToAddTo) 
+	{
+		setupFields(tableToAddTo);
+		inputs.clear();
+		AddFrame frame = new AddFrame(this.dbUsername, this.con, this.fieldNames, tableToAddTo, new ArrayList<JTextField>(), this.table, this);
+		frame.open();
+	}
+	
 	/**
 	 * This button is attached to the 'Search' button, and executes the search when the button is hit.
 	 * @author juricar
@@ -407,10 +445,8 @@ public class UseFrame {
 
 		@Override
 		public void actionPerformed(ActionEvent arg0) {
-//			System.out.println(String.valueOf(filterMenu.getSelectedItem()));
-			if(String.valueOf(filterMenu.getSelectedItem()).equals("All") /*|| String.valueOf(filterMenu.getSelectedItem()) == null*/)
+			if(String.valueOf(filterMenu.getSelectedItem()).equals("All") || filterMenu.getSelectedItem() == null)
 			{
-//				System.out.println("I'm inside if statement");
 				searchTables(String.valueOf(selectionMenu.getSelectedItem()), "");
 			}
 			else

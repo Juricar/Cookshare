@@ -228,6 +228,8 @@ public class CookshareConnectionService {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
+			dbUsername = userBox.getText();
+			dbPassword = passBox.getText();
 			byte[] salt = getNewSalt();
 			String hPwd = hashPassword(salt, dbPassword);
 			Connection con = getConnection();

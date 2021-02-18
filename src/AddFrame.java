@@ -8,6 +8,7 @@ import java.util.ArrayList;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.JTextField;
@@ -21,16 +22,16 @@ public class AddFrame {
 	String tableToAddTo;
 	ArrayList<JTextField> inputs;
 	JTable table;
-
+	UseFrame uf;
 	
-	public AddFrame(String username, Connection receivedConnection, ArrayList<String> fields, String correctTable, ArrayList<JTextField> correctInputs, JTable table2) {
+	public AddFrame(String username, Connection receivedConnection, ArrayList<String> fields, String correctTable, ArrayList<JTextField> correctInputs, JTable table2, UseFrame uf) {
 		this.dbUsername = username;
 		this.con = receivedConnection;
 		this.fieldNames = fields;
 		this.tableToAddTo = correctTable;
 		this.inputs = correctInputs;
 		this.table = table2;
-		
+		this.uf = uf;
 	}
 	
 	public void open() {
@@ -41,7 +42,8 @@ public class AddFrame {
 		for(int i = 0; i < this.fieldNames.size(); i++) {
 			if(!(this.fieldNames.get(i).equals("ID") || this.fieldNames.get(i).equals("UserID") 
 					|| this.fieldNames.get(i).equals("Username") || this.fieldNames.get(i).equals("Author") 
-					|| ((tableToAddTo.equals("Steps")|| tableToAddTo.equals("Reviews")) && this.fieldNames.get(i).equals("RecipeID")))) {
+					|| ((tableToAddTo.equals("Steps")|| tableToAddTo.equals("Reviews") || tableToAddTo.equals("Uses") || tableToAddTo.equals("Ingredients")) 
+							&& this.fieldNames.get(i).equals("RecipeID")))) {
 				JTextField textBox = new JTextField(20);
 				textBox.setText(this.fieldNames.get(i));
 				panel.add(textBox);
@@ -65,7 +67,7 @@ public class AddFrame {
 			try {
 				CallableStatement cs = null;
 				int questionMarkIndex = 2;
-
+				
 				switch (tableToAddTo) {
 					case "BelongsTo":
 						cs = con.prepareCall("{? = call addBelongsTo(?,?)}");
@@ -100,11 +102,8 @@ public class AddFrame {
 						for(int i = 0; i < inputs.size(); i++) {
 							cs.setString(questionMarkIndex, inputs.get(i).getText());
 							questionMarkIndex++;
-							if(i == 3) {
-								cs.setInt(questionMarkIndex++, Integer.parseInt(inputs.get(i).getText()));
-								questionMarkIndex++;
-							}
 						}
+						cs.setInt(questionMarkIndex, Integer.parseInt((table.getValueAt(table.getSelectedRow(), 0)).toString()));
 						break;
 					
 					case "Recipe":
@@ -112,10 +111,20 @@ public class AddFrame {
 						cs.registerOutParameter(1, Types.INTEGER);
 
 						for(int i = 0; i < inputs.size(); i++) {
-//							System.out.println(inputs.get(i).getText());
-							if(i == 0 || i == 1 || i == 3) {
+							if(i == 0 || i == 1) {
 								cs.setString(questionMarkIndex, inputs.get(i).getText());
 								questionMarkIndex++;
+							}
+							else if(i == 3)
+							{
+								String dishName = inputs.get(i).getText();
+								cs.setString(questionMarkIndex, dishName);
+								questionMarkIndex++;
+								if(!checkInTable("Dish", dishName))
+								{
+									uf.addFrame("Dish");
+									return;
+								}
 							}
 							else if (i == 2 ){
 								if(inputs.get(i).getText().isEmpty())
@@ -135,6 +144,7 @@ public class AddFrame {
 						}
 						
 						cs.setString(6, dbUsername);
+						
 						break;
 					
 					case "Reviews":
@@ -146,7 +156,13 @@ public class AddFrame {
 						questionMarkIndex++;
 						for(int i = 0; i < inputs.size(); i++) {
 							if(i == 0) {
-								cs.setInt(questionMarkIndex, Integer.parseInt(inputs.get(i).getText()));
+								int rating = Integer.parseInt(inputs.get(i).getText());
+								if (rating > 5 || rating < 0)
+								{
+									JOptionPane.showMessageDialog(null, "Rating must be between 0 and 5!");
+									return;
+								}
+								cs.setInt(questionMarkIndex, rating);
 								questionMarkIndex++;
 							}
 							else {
@@ -182,14 +198,43 @@ public class AddFrame {
 						cs.registerOutParameter(1, Types.INTEGER);
 						cs.setString(questionMarkIndex, inputs.get(0).getText());
 						break;
+					case "Cuisine":
+						cs = con.prepareCall("{? = call addCuisine(?)}");
+						cs.registerOutParameter(1, Types.INTEGER);
+						cs.setString(questionMarkIndex, inputs.get(0).getText());
+					case "Uses":
+						cs = con.prepareCall("{? = call addUses(?,?)}");
+						cs.registerOutParameter(1, Types.INTEGER);
+						cs.setString(questionMarkIndex, inputs.get(0).getText());
+						questionMarkIndex++;
+						cs.setInt(questionMarkIndex, Integer.parseInt(table.getValueAt(table.getSelectedRow(), 0).toString()));
 				}
 				cs.execute();
 				adderFrame.dispose();
 			} catch (SQLException e) {
-				System.out.println("Didn't work again.");
 				e.printStackTrace();
 			}
 			
+		}
+
+		private boolean checkInTable(String tableName, String entry) {
+			try
+			{
+				CallableStatement cs = con.prepareCall("{? = call checkInTable(?,?)}");
+				int result;
+				cs.registerOutParameter(1, Types.INTEGER);
+				cs.setString(2, tableName);
+				cs.setString(3, entry);
+				cs.execute();
+				result = cs.getInt(1);
+				System.out.println(String.valueOf(result));
+				return (result == 0);
+			}
+			catch(SQLException e)
+			{
+				e.printStackTrace();
+			}
+			return true;
 		}
 	}
 	
