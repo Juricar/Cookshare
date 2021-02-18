@@ -55,7 +55,7 @@ public class DatabaseGenerator {
 				wr.write("Steps:" + stepResults);
 				wr.write("Diet:~" + DietGen() + "\n");
 				wr.write("Calories:~" + String.valueOf(this.rand.nextInt(951) + 50) + "\n");
-				wr.write("---\n");
+				wr.write("---~\n");
 			}
 			wr.write("***");
 			wr.close();
