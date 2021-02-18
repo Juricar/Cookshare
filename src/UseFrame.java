@@ -155,7 +155,7 @@ public class UseFrame {
 											cs.execute();
 											searchTables("Recipe", "", (String) sortMenu.getSelectedItem());
 										} catch (SQLException err) {
-											err.printStackTrace();
+											JOptionPane.showMessageDialog(null, "Something went wrong");
 										}
 										frameToDispose.dispose();
 									} else {
@@ -357,7 +357,7 @@ public class UseFrame {
 			parseResults(rs, rsmd);
 			
 		} catch (SQLException e) {
-			e.printStackTrace();
+			JOptionPane.showMessageDialog(null, "Something went wrong");
 		}
 	}
 	
@@ -391,7 +391,7 @@ public class UseFrame {
 			scrollPane.getViewport ().add (table);
 		}
 		catch (SQLException e) {
-			e.printStackTrace();
+			JOptionPane.showMessageDialog(null, "Something went wrong");
 		}		
 	}
 	
@@ -427,7 +427,7 @@ public class UseFrame {
 			parseResults(rs, rsmd);
 		}
 		catch (SQLException e) {
-			e.printStackTrace();
+			JOptionPane.showMessageDialog(null, "Something went wrong");
 		}
 	}
 	
@@ -465,7 +465,7 @@ public class UseFrame {
 			if(table.equals("Ingredients")) names.add("RecipeID");
 			fieldNames = names;
 		} catch (SQLException e) {
-			e.printStackTrace();
+			JOptionPane.showMessageDialog(null, "Something went wrong");
 		}
 	}
 	

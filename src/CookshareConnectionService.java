@@ -295,7 +295,6 @@ public class CookshareConnectionService {
 			catch (SQLException e1) 
 			{
 				JOptionPane.showMessageDialog(null, "Login failed");
-				e1.printStackTrace();
 				return;
 			}
 			openUseFrame();

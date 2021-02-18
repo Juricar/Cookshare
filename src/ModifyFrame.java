@@ -8,6 +8,7 @@ import java.util.ArrayList;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.JTextField;
@@ -167,8 +168,7 @@ public class ModifyFrame {
 //				System.out.println("Adding Dish complete!");
 				adderFrame.dispose();
 			} catch (SQLException e) {
-				System.out.println("Didn't work again.");
-				e.printStackTrace();
+				JOptionPane.showMessageDialog(null, "Something went wrong");
 			}
 			
 		}

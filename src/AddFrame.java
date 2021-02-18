@@ -212,7 +212,7 @@ public class AddFrame {
 				cs.execute();
 				adderFrame.dispose();
 			} catch (SQLException e) {
-				e.printStackTrace();
+				JOptionPane.showMessageDialog(null, "Something went wrong");
 			}
 			
 		}
@@ -232,7 +232,7 @@ public class AddFrame {
 			}
 			catch(SQLException e)
 			{
-				e.printStackTrace();
+				JOptionPane.showMessageDialog(null, "Something went wrong");
 			}
 			return true;
 		}

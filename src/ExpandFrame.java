@@ -9,6 +9,7 @@ import java.sql.Types;
 
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
@@ -74,7 +75,7 @@ public class ExpandFrame {
 				textArea.setText(reviewText);
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				JOptionPane.showMessageDialog(null, "Something went wrong");
 			}
 		}
 		
@@ -101,7 +102,7 @@ public class ExpandFrame {
 			}
 			catch (SQLException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				JOptionPane.showMessageDialog(null, "Something went wrong");
 			}
 		}
 		frame.setVisible(true);
