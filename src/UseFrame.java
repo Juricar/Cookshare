@@ -205,7 +205,7 @@ public class UseFrame {
 							listeners.add(new ActionListener() {
 								public void actionPerformed(ActionEvent e) {
 									if(dbUsername.equals(table.getValueAt(table.getSelectedRow(), 4).toString())) {
-										addFrame("Ingredients");
+										addFrame("Has");
 										frameToDispose.dispose();
 									} else {
 										JOptionPane.showMessageDialog(null, "You can't add ingredients to another user's recipe!");
@@ -214,8 +214,8 @@ public class UseFrame {
 							});
 							listeners.add(new ActionListener() {
 								public void actionPerformed (ActionEvent e) {
-									searchTables("Ingredients", table.getValueAt(table.getSelectedRow(), 0).toString(), (String) sortMenu.getSelectedItem());
-									selectionMenu.setSelectedIndex(4);
+									searchTables("Has", table.getValueAt(table.getSelectedRow(), 0).toString(), (String) sortMenu.getSelectedItem());
+									selectionMenu.setSelectedIndex(3);
 									frameToDispose.dispose();
 								}
 							});
@@ -300,6 +300,14 @@ public class UseFrame {
 								public void actionPerformed (ActionEvent e) {
 									tableToExpand = "Reviews";
 									expandFrame(tableToExpand);
+								}
+							});
+							break;
+						case "Has":
+							names.add("Edit ingredients contained");
+							listeners.add(new ActionListener() {
+								public void actionPerformed (ActionEvent e) {
+									modifyFrame("Has", 0);
 								}
 							});
 					}

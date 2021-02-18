@@ -88,11 +88,29 @@ public class AddFrame {
 						break;
 					
 					case "Has":
-						cs = con.prepareCall("{? = call addHas(?,?)}");
+						cs = con.prepareCall("{? = call addHas(?,?,?)}");
 						cs.registerOutParameter(1, Types.INTEGER);
 						for(int i = 0; i < inputs.size(); i++) {
-							cs.setInt(questionMarkIndex, Integer.parseInt(inputs.get(i).getText()));
-							questionMarkIndex++;
+							if(!checkInTable("Recipe", String.valueOf(inputs.get(0).getText())))
+							{
+								uf.addFrame("Recipe");
+								return;
+							}
+							if(!checkInTable("Ingredients", String.valueOf(inputs.get(1).getText())))
+							{
+								uf.addFrame("Ingredients");
+								return;
+							}
+							if(i == 2)
+							{
+								cs.setInt(questionMarkIndex, Integer.parseInt(inputs.get(i).getText()));
+								questionMarkIndex++;
+							}
+							else
+							{
+								cs.setString(questionMarkIndex, String.valueOf(inputs.get(i).getText()));
+								questionMarkIndex++;
+							}
 						}
 						break;
 						

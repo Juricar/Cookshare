@@ -45,7 +45,7 @@ public class ModifyFrame {
 		for(int i = 0; i < this.fieldNames.size(); i++) {
 			if(!(this.fieldNames.get(i).equals("ID") || this.fieldNames.get(i).equals("UserID") 
 					|| this.fieldNames.get(i).equals("Username") || this.fieldNames.get(i).equals("Author") 
-					|| ((tableToModify.equals("Steps")|| tableToModify.equals("Reviews")) && this.fieldNames.get(i).equals("RecipeID"))
+					|| ((tableToModify.equals("Steps")|| tableToModify.equals("Reviews") || tableToModify.equals("Has")) && this.fieldNames.get(i).equals("RecipeID"))
 					|| (tableToModify.equals("Recipe") && this.fieldNames.get(i).equals("Name")))) {
 				JTextField textBox = new JTextField(20);
 				textBox.setText(this.fieldNames.get(i));
@@ -89,14 +89,14 @@ public class ModifyFrame {
 //						}
 //						break;
 //					
-//					case "Has":
-//						cs = con.prepareCall("{? = call addHas(?,?)}");
-//						cs.registerOutParameter(1, Types.INTEGER);
-//						for(int i = 0; i < inputs.size(); i++) {
-//							cs.setInt(questionMarkIndex, Integer.parseInt(inputs.get(i).getText()));
-//							questionMarkIndex++;
-//						}
-//						break;
+					case "Has":
+						cs = con.prepareCall("{? = call modifyHas(?,?,?,?)}");
+						cs.registerOutParameter(1, Types.INTEGER);
+						cs.setString(2, table.getValueAt(table.getSelectedRow(), 0).toString());
+						cs.setString(3, table.getValueAt(table.getSelectedRow(), 1).toString());
+						cs.setString(4, sanitize(inputs.get(0).getText()));
+						cs.setInt(5, Integer.parseInt(inputs.get(1).getText()));
+						break;
 					
 					case "Recipe":
 						cs = con.prepareCall("{? = call modifyRecipe(?,?,?,?)}");
