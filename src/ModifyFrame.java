@@ -96,15 +96,6 @@ public class ModifyFrame {
 //							questionMarkIndex++;
 //						}
 //						break;
-//						
-//					case "Ingredients":
-//						cs = con.prepareCall("{? = call addIngredients(?,?)}");
-//						cs.registerOutParameter(1, Types.INTEGER);
-//						for(int i = 0; i < inputs.size(); i++) {
-//							cs.setString(questionMarkIndex, inputs.get(i).getText());
-//							questionMarkIndex++;
-//						}
-//						break;
 					
 					case "Recipe":
 						cs = con.prepareCall("{? = call modifyRecipe(?,?,?,?)}");
@@ -134,25 +125,25 @@ public class ModifyFrame {
 						}						
 						break;
 					
-//					case "Reviews":
-//						cs = con.prepareCall("{? = call addReviews(?,?,?,?)}");
-//						cs.registerOutParameter(1, Types.INTEGER);
-//						cs.setString(questionMarkIndex, dbUsername);
-//						questionMarkIndex++;
-//						cs.setInt(questionMarkIndex, Integer.parseInt((table.getValueAt(table.getSelectedRow(), 0)).toString()));
-//						questionMarkIndex++;
-//						for(int i = 0; i < inputs.size(); i++) {
-//							if(i == 0) {
-//								cs.setInt(questionMarkIndex, Integer.parseInt(inputs.get(i).getText()));
-//								questionMarkIndex++;
-//							}
-//							else {
-//								cs.setString(questionMarkIndex, inputs.get(i).getText());
-//								questionMarkIndex++;
-//							}
-//						}
-//						break;
-//					
+					case "Reviews":
+						cs = con.prepareCall("{? = call modifyReview(?,?,?,?)}");
+						cs.registerOutParameter(1, Types.INTEGER);
+						cs.setString(questionMarkIndex, dbUsername);
+						questionMarkIndex++;
+						cs.setInt(questionMarkIndex, Integer.parseInt((table.getValueAt(table.getSelectedRow(), 0)).toString()));
+						questionMarkIndex++;
+						for(int i = 0; i < inputs.size(); i++) {
+							if(i == 0) {
+								cs.setInt(questionMarkIndex, Integer.parseInt(inputs.get(i).getText()));
+								questionMarkIndex++;
+							}
+							else {
+								cs.setString(questionMarkIndex, inputs.get(i).getText());
+								questionMarkIndex++;
+							}
+						}
+						break;
+					
 					case "Steps":
 						cs = con.prepareCall("{? = call modifySteps(?,?,?,?)}");
 						cs.registerOutParameter(1, Types.INTEGER);
@@ -170,12 +161,6 @@ public class ModifyFrame {
 							
 						}
 						cs.setString(questionMarkIndex,  dbUsername);
-						break;
-					
-					case "Utensils":
-						cs = con.prepareCall("{? = call addUtensils(?)}");
-						cs.registerOutParameter(1, Types.INTEGER);
-						cs.setString(questionMarkIndex, inputs.get(0).getText());
 						break;
 				}
 				cs.execute();

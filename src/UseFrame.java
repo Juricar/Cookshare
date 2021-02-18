@@ -171,6 +171,7 @@ public class UseFrame {
 							listeners.add(new ActionListener(){
 								public void actionPerformed (ActionEvent e){
 									searchTables("Reviews", table.getValueAt(table.getSelectedRow(), 0).toString());
+									selectionMenu.setSelectedIndex(5);
 									frameToDispose.dispose();
 								}
 							});
@@ -264,6 +265,13 @@ public class UseFrame {
 								}
 							});
 							break;
+						case "Reviews":
+							names.add("Edit Review");
+							listeners.add(new ActionListener() {
+								public void actionPerformed (ActionEvent e) {
+									modifyFrame("Reviews", 0);
+								}
+							});
 					}
 					contextMenu(names, listeners);
 				}
