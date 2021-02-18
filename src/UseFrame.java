@@ -1,5 +1,7 @@
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.EventQueue;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.CallableStatement;
@@ -7,16 +9,20 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.ArrayList;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
+import javax.swing.border.EmptyBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
@@ -29,10 +35,13 @@ public class UseFrame {
 	JTable table;
 	JComboBox<String> selectionMenu;
 	JComboBox<String> filterMenu;
+	JComboBox<String> sortMenu;
 	ArrayList<JTextField> inputs = new ArrayList<JTextField>();
 	String[] tableNames = {"Cuisine", "BelongsTo", "Dish", "Has", "Ingredients", "Recipe", "Reviews", "Steps", "User", "Uses", "Utensils"};
 	String[] filters = {"All"};
+	String[] sortVals = {"None", "Highest Rating"};
 	String tableToAddTo;
+	String tableToExpand;
 	String tableToModify;
 	JTextField filterValue;
 	int numFields;
@@ -41,6 +50,7 @@ public class UseFrame {
 	Connection con;
 	JFrame frameToDispose;
 	JFrame adderFrame;
+	int recipeID;
 
 
 
@@ -52,7 +62,7 @@ public class UseFrame {
 	public void open() {
 		setupUI();
 		
-		searchTables("BelongsTo","");
+		searchTables("Recipe","", (String) sortMenu.getSelectedItem());
 		
 		setupOnClick();
 		
@@ -78,12 +88,17 @@ public class UseFrame {
 
 		
 		JComboBox<String> tableList = new JComboBox<>(tableNames);
-		tableList.setSelectedIndex(1);
+		tableList.setSelectedIndex(5);
 		this.selectionMenu = tableList;
 		
 		JComboBox<String> filterList = new JComboBox<>(filters);
 		filterList.setSelectedIndex(0);
 		this.filterMenu = filterList;
+		
+		JComboBox<String> sortList = new JComboBox<>(sortVals);
+		sortList.setSelectedIndex(0);
+		this.sortMenu = sortList;
+		
 		
 		this.filterValue = new JTextField(25);
 		this.filterValue.setText("Enter Filter Value");
@@ -94,12 +109,13 @@ public class UseFrame {
 		JButton addButton = new JButton("Add");
 		addButton.addActionListener(new AddButtonListener());
 
-		topPanel.add(tableList, BorderLayout.WEST);
-		topPanel.add(searchButton, BorderLayout.EAST);
-		topPanel.add(addButton, BorderLayout.EAST);
-		topPanel.add(filterList, BorderLayout.SOUTH);
-		topPanel.add(this.filterValue, BorderLayout.SOUTH);
-		panel.add(this.scrollPane, BorderLayout.CENTER);
+		topPanel.add(tableList, BorderLayout.NORTH);
+		topPanel.add(searchButton, BorderLayout.NORTH);
+		topPanel.add(addButton, BorderLayout.NORTH);
+		topPanel.add(filterList, BorderLayout.NORTH);
+		topPanel.add(sortList, BorderLayout.NORTH);
+		topPanel.add(this.filterValue, BorderLayout.NORTH);
+		panel.add(this.scrollPane, BorderLayout.SOUTH);
 		frame.pack();
 		frame.setVisible(true);
 	}
@@ -123,9 +139,10 @@ public class UseFrame {
 							names.add("View ingredients");
 							names.add("View utensils");
 							names.add("Add a utensil");
+							
 							listeners.add(new ActionListener() {
 								public void actionPerformed (ActionEvent e) {
-									searchTables("Steps", table.getValueAt(table.getSelectedRow(), 0).toString());
+									searchTables("Steps", table.getValueAt(table.getSelectedRow(), 0).toString(), (String) sortMenu.getSelectedItem());
 									selectionMenu.setSelectedIndex(7);
 									frameToDispose.dispose();
 								}
@@ -138,7 +155,7 @@ public class UseFrame {
 											cs.setString(1, table.getValueAt(table.getSelectedRow(), 0).toString());
 											cs.setString(2, dbUsername);
 											cs.execute();
-											searchTables("Recipe", "");
+											searchTables("Recipe", "", (String) sortMenu.getSelectedItem());
 										} catch (SQLException err) {
 											err.printStackTrace();
 										}
@@ -170,7 +187,8 @@ public class UseFrame {
 							});
 							listeners.add(new ActionListener(){
 								public void actionPerformed (ActionEvent e){
-									searchTables("Reviews", table.getValueAt(table.getSelectedRow(), 0).toString());
+									recipeID = Integer.parseInt(table.getValueAt(table.getSelectedRow(), 0).toString());
+									searchTables("Reviews", table.getValueAt(table.getSelectedRow(), 0).toString(), (String) sortMenu.getSelectedItem());
 									selectionMenu.setSelectedIndex(5);
 									frameToDispose.dispose();
 								}
@@ -199,7 +217,7 @@ public class UseFrame {
 							});
 							listeners.add(new ActionListener() {
 								public void actionPerformed (ActionEvent e) {
-									searchTables("Ingredients", table.getValueAt(table.getSelectedRow(), 0).toString());
+									searchTables("Ingredients", table.getValueAt(table.getSelectedRow(), 0).toString(), (String) sortMenu.getSelectedItem());
 									selectionMenu.setSelectedIndex(4);
 									frameToDispose.dispose();
 								}
@@ -224,16 +242,16 @@ public class UseFrame {
 							break;
 						case "Dish":
 							names.add("View Recipes");
-							names.add("View Recipes by dish type");
+							names.add("View Recipes by Dish Type");
 							listeners.add(new ActionListener() {
 								public void actionPerformed (ActionEvent e){
-									searchTables("Recipe", table.getValueAt(table.getSelectedRow(), 0).toString());
+									searchTables("Recipe", table.getValueAt(table.getSelectedRow(), 0).toString(), (String) sortMenu.getSelectedItem());
 									frameToDispose.dispose();
 								}
 							});
 							listeners.add(new ActionListener() {
 								public void actionPerformed (ActionEvent e){
-									searchTables("Recipe", table.getValueAt(table.getSelectedRow(), 2).toString());
+									searchTables("Recipe", table.getValueAt(table.getSelectedRow(), 2).toString(), (String) sortMenu.getSelectedItem());
 									frameToDispose.dispose();
 								}
 							});
@@ -267,9 +285,17 @@ public class UseFrame {
 							break;
 						case "Reviews":
 							names.add("Edit Review");
+							names.add("Expand Review");
 							listeners.add(new ActionListener() {
 								public void actionPerformed (ActionEvent e) {
-									modifyFrame("Reviews", 0);
+									if(dbUsername.equals(table.getValueAt(table.getSelectedRow(), 0))) modifyFrame("Reviews", 0);
+									else JOptionPane.showMessageDialog(null, "You can't edit another user's review!");
+								}
+							});
+							listeners.add(new ActionListener() {
+								public void actionPerformed (ActionEvent e) {
+									tableToExpand = "Reviews";
+									expandFrame(tableToExpand, recipeID);
 								}
 							});
 					}
@@ -314,11 +340,12 @@ public class UseFrame {
 	}
 	
 	
-	public void searchTables(String tableToSearch, String searchParam) {
+	public void searchTables(String tableToSearch, String searchParam, String sortParam) {
 		try {
-			CallableStatement cs = this.con.prepareCall("{call search(?,?)}");
+			CallableStatement cs = this.con.prepareCall("{call search(?,?,?)}");
 			cs.setString(1, tableToSearch);
 			cs.setString(2, searchParam);
+			cs.setString(3,  sortParam);
 			cs.execute();
 			
 			ResultSet rs = cs.getResultSet();
@@ -403,9 +430,10 @@ public class UseFrame {
 	public void setupFields(String table)
 	{
 		try {
-			CallableStatement cs = con.prepareCall("{call search(?,?)}");
+			CallableStatement cs = con.prepareCall("{call search(?,?,?)}");
 			cs.setString(1, table);
 			cs.setString(2, "");
+			cs.setString(3, (String) sortMenu.getSelectedItem());
 			cs.execute();
 			ResultSet rs = cs.getResultSet();
 			ResultSetMetaData rsmd = rs.getMetaData();
@@ -445,6 +473,39 @@ public class UseFrame {
 		frame.open();
 	}
 	
+	public void expandFrame(String expandThisTable, int correspondingID) {
+		String recipeName = null;
+		String creatorOfReview = null;
+		int rating = 0;
+//		int recipeID = correspondingID;
+//		int rating = Integer.parseInt(table.getValueAt(table.getSelectedRow(), 0).toString());
+//		String text = table.getValueAt(table.getSelectedRow(), 1).toString();
+		if(expandThisTable == "Reviews") {
+//			int correspondingRecipeID = Integer.parseInt(table.getValueAt(table.getSelectedRow(), 1).toString());
+			try {
+				CallableStatement cs = con.prepareCall("? = {call getReviewDetails(?)}");
+				cs.registerOutParameter(1, Types.VARCHAR);
+				cs.setInt(2, correspondingID);
+				cs.execute();
+				ResultSet rs = cs.getResultSet();
+				ResultSetMetaData rsmd = rs.getMetaData();
+				
+				recipeName = rs.getObject("Name").toString();
+				creatorOfReview = rs.getObject("Username").toString();
+				rating = Integer.parseInt(rs.getObject("Rating").toString());
+				System.out.println("RecipeName: " + recipeName);
+				System.out.println("Creator: " + creatorOfReview);
+				System.out.println("Rating: " + rating);
+				
+
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		ExpandFrame frame = new ExpandFrame(expandThisTable, recipeName, creatorOfReview, rating);
+		frame.open();
+	}
+	
 	public void addFrame(String tableToAddTo) 
 	{
 		setupFields(tableToAddTo);
@@ -464,7 +525,7 @@ public class UseFrame {
 		public void actionPerformed(ActionEvent arg0) {
 			if(String.valueOf(filterMenu.getSelectedItem()).equals("All") || filterMenu.getSelectedItem() == null)
 			{
-				searchTables(String.valueOf(selectionMenu.getSelectedItem()), "");
+				searchTables(String.valueOf(selectionMenu.getSelectedItem()), "", (String) sortMenu.getSelectedItem());
 			}
 			else
 			{
@@ -487,6 +548,9 @@ public class UseFrame {
 			{
 				JOptionPane.showMessageDialog(null, "You must add " + tableToAddTo.toLowerCase() + " through the recipe view");
 			}
+			else if(tableToAddTo.equals("Belongs To")) {
+				JOptionPane.showMessageDialog(null,  "This is not a table in which you can add anything.  This is strictly for the user's view");
+			}
 			else
 			{
 				addFrame(tableToAddTo);
@@ -495,4 +559,5 @@ public class UseFrame {
 		}
 
 	}
+	
 }
