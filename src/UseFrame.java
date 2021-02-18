@@ -52,8 +52,6 @@ public class UseFrame {
 	JFrame adderFrame;
 	int recipeID;
 
-
-
 	public UseFrame(String username, Connection receivedConnection) {
 		this.dbUsername = username;
 		this.con = receivedConnection;
@@ -187,9 +185,8 @@ public class UseFrame {
 							});
 							listeners.add(new ActionListener(){
 								public void actionPerformed (ActionEvent e){
-									recipeID = Integer.parseInt(table.getValueAt(table.getSelectedRow(), 0).toString());
 									searchTables("Reviews", table.getValueAt(table.getSelectedRow(), 0).toString(), (String) sortMenu.getSelectedItem());
-									selectionMenu.setSelectedIndex(5);
+									selectionMenu.setSelectedIndex(6);
 									frameToDispose.dispose();
 								}
 							});
@@ -276,10 +273,17 @@ public class UseFrame {
 							break;
 						case "Steps":
 							names.add("Edit Step");
+							names.add("Expand step");
 							listeners.add(new ActionListener() {
 								public void actionPerformed (ActionEvent e) {
 									int stepIDToModify = Integer.parseInt((table.getValueAt(table.getSelectedRow(), 0)).toString());
 									modifyFrame("Steps", stepIDToModify);
+								}
+							});
+							listeners.add(new ActionListener() {
+								public void actionPerformed (ActionEvent e) {
+									tableToExpand = "Steps";
+									expandFrame(tableToExpand);
 								}
 							});
 							break;
@@ -295,7 +299,7 @@ public class UseFrame {
 							listeners.add(new ActionListener() {
 								public void actionPerformed (ActionEvent e) {
 									tableToExpand = "Reviews";
-									expandFrame(tableToExpand, recipeID);
+									expandFrame(tableToExpand);
 								}
 							});
 					}
@@ -473,36 +477,8 @@ public class UseFrame {
 		frame.open();
 	}
 	
-	public void expandFrame(String expandThisTable, int correspondingID) {
-		String recipeName = null;
-		String creatorOfReview = null;
-		int rating = 0;
-//		int recipeID = correspondingID;
-//		int rating = Integer.parseInt(table.getValueAt(table.getSelectedRow(), 0).toString());
-//		String text = table.getValueAt(table.getSelectedRow(), 1).toString();
-		if(expandThisTable == "Reviews") {
-//			int correspondingRecipeID = Integer.parseInt(table.getValueAt(table.getSelectedRow(), 1).toString());
-			try {
-				CallableStatement cs = con.prepareCall("? = {call getReviewDetails(?)}");
-				cs.registerOutParameter(1, Types.VARCHAR);
-				cs.setInt(2, correspondingID);
-				cs.execute();
-				ResultSet rs = cs.getResultSet();
-				ResultSetMetaData rsmd = rs.getMetaData();
-				
-				recipeName = rs.getObject("Name").toString();
-				creatorOfReview = rs.getObject("Username").toString();
-				rating = Integer.parseInt(rs.getObject("Rating").toString());
-				System.out.println("RecipeName: " + recipeName);
-				System.out.println("Creator: " + creatorOfReview);
-				System.out.println("Rating: " + rating);
-				
-
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-		}
-		ExpandFrame frame = new ExpandFrame(expandThisTable, recipeName, creatorOfReview, rating);
+	public void expandFrame(String expandThisTable) {
+		ExpandFrame frame = new ExpandFrame(expandThisTable, table, con);
 		frame.open();
 	}
 	
