@@ -270,6 +270,7 @@ public class UseFrame {
 							listeners.add(new ActionListener() {
 								public void actionPerformed (ActionEvent e){
 									filterTables("Dish", "Cuisine", table.getValueAt(table.getSelectedRow(), 0).toString());
+									selectionMenu.setSelectedIndex(2);
 									frameToDispose.dispose();
 								}
 							});
