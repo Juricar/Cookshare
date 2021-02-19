@@ -272,25 +272,31 @@ public class CookshareConnectionService {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			String query = "SELECT PasswordSalt, PasswordHash FROM [Cookshare].[dbo].[User] WHERE Username = ?";
-			String salt = null;
-			String hPwd = null;
 			dbUsername = userBox.getText();
 			dbPassword = passBox.getText();
+			Connection con = getConnection();
 			try 
 			{
-				PreparedStatement stmt = getConnection().prepareStatement(query);
-				stmt.setString(1, dbUsername);
-				ResultSet rs = stmt.executeQuery();
+				CallableStatement cs = con.prepareCall("{? = call login(?)}");
+				cs.registerOutParameter(1, Types.INTEGER);
+				cs.setString(2, dbUsername);
+				cs.execute();
+				ResultSet rs = cs.getResultSet();
 				rs.next();
-				salt = rs.getString("PasswordSalt");
-				hPwd = rs.getString("PasswordHash");
+				String salt = rs.getString("PasswordSalt");
+				String hPwd = rs.getString("PasswordHash");
+				
+				if(cs.getInt(1) == 1) {
+					JOptionPane.showMessageDialog(null, "Login failed");
+					return;				
+				}
 				if(salt == null)
 				{
 					JOptionPane.showMessageDialog(null, "Login failed");
 					return;
 				}
 				String checkPwd = hashPassword(salt.getBytes(), dbPassword);
+				System.out.println(checkPwd);
 				if(!(checkPwd.equals(hPwd)))
 				{
 					JOptionPane.showMessageDialog(null, "Login failed");
@@ -300,6 +306,7 @@ public class CookshareConnectionService {
 			catch (SQLException e1) 
 			{
 				JOptionPane.showMessageDialog(null, "Login failed");
+//				System.out.println("Failing in the catch");
 				return;
 			}
 			openUseFrame();
