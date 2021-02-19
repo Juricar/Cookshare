@@ -15,23 +15,22 @@ public class Importer {
 	private String file;
 	private CookshareConnectionService db;
 	private Connection c;
-	private final String dbName = "Cookshare4";
+	private final String dbName = "Cookshare";
 	private final String serverName = "titan.csse.rose-hulman.edu";
-	
+
 	public static void main(String[] args) {
 		new Importer();
 	}
-	
+
 	public Importer() {
 		this.file = "src/cookdb.txt";
 		db = new CookshareConnectionService(serverName, dbName);
 		db.connect("juricar", "Atsknktvegef24035526LCA!");
 		c = db.getConnection();
 		ArrayList<CookBookEntry> entries = parseGames(this.file);
-		createDefaultUser();
+		//createDefaultUser();
 		for (CookBookEntry cb : entries) {
-			try 
-			{
+			try {
 				CallableStatement cs = c.prepareCall("{? = call importData(?,?,?,?,?,?,?)}");
 				cs.registerOutParameter(1, Types.INTEGER);
 				cs.setString(2, cb.recipeName);
@@ -43,37 +42,42 @@ public class Importer {
 				cs.setString(8, cb.calories);
 				cs.execute();
 				int recipeID = cs.getInt(1);
-				System.out.println(recipeID);
-				for (int i = 0; i < cb.ingredients.size(); i++) {
-					cs = c.prepareCall("{? = call addIngredients(?,?,?)}");
-					cs.registerOutParameter(1, Types.INTEGER);
-					cs.setString(2, cb.ingredients.get(i));
-					cs.setString(3, cb.ingredientsTypes.get(i));
-					cs.setInt(4, recipeID);
-					cs.execute();
+				if (recipeID != 0) {
+					System.out.println(recipeID);
+					for (int i = 0; i < cb.ingredients.size(); i++) {
+						cs = c.prepareCall("{? = call addIngredients(?,?)}");
+						cs.registerOutParameter(1, Types.INTEGER);
+						cs.setString(2, cb.ingredients.get(i));
+						cs.setString(3, cb.ingredientsTypes.get(i));
+						cs.execute();
+
+						cs = c.prepareCall("{? = call addHas(?,?,?)}");
+						cs.registerOutParameter(1, Types.INTEGER);
+						cs.setString(2, cb.recipeName);
+						cs.setString(3, cb.ingredients.get(i));
+						cs.setString(4, "1");
+						cs.execute();
+					}
+					for (int j = 0; j < cb.steps.size(); j++) {
+						cs = c.prepareCall("{? = call addSteps(?,?,?,?)}");
+						cs.registerOutParameter(1, Types.INTEGER);
+						cs.setInt(2, (j + 1));
+						cs.setString(3, cb.steps.get(j));
+						cs.setInt(4, recipeID);
+						cs.setString(5, "Default");
+						cs.execute();
+					}
 				}
-				for (int j = 0; j < cb.steps.size(); j++) {
-					cs = c.prepareCall("{? = call addSteps(?,?,?,?)}");
-					cs.registerOutParameter(1, Types.INTEGER);
-					cs.setInt(2, (j + 1));
-					cs.setString(3, cb.steps.get(j));
-					cs.setInt(4, recipeID);
-					cs.setString(5, "Default");
-					cs.execute();
-				}
-			} 
-			catch (SQLException e1) 
-			{
+			} catch (SQLException e1) {
 				e1.printStackTrace();
 				return;
 			}
 		}
 		db.closeConnection();
 	}
-	
+
 	private void createDefaultUser() {
-		try 
-		{
+		try {
 			byte[] salt = db.getNewSalt();
 			String hPwd = db.hashPassword(salt, "Password123");
 			CallableStatement cs = c.prepareCall("{? = call Register(?,?,?)}");
@@ -83,14 +87,11 @@ public class Importer {
 			cs.setString(4, hPwd);
 			cs.execute();
 			int returnValue = cs.getInt(1);
-			if(returnValue != 0)
-			{
+			if (returnValue != 0) {
 				JOptionPane.showMessageDialog(null, "Registration failed");
 				return;
 			}
-		} 
-		catch (SQLException e1) 
-		{
+		} catch (SQLException e1) {
 			e1.printStackTrace();
 			return;
 		}
@@ -105,13 +106,21 @@ public class Importer {
 			in = new BufferedReader(new FileReader(file));
 			line = in.readLine();
 			String[] stream = line.split("~");
-			while(line != null) {
+			while (line != null) {
 				stream = line.split("~");
-				switch(stream[0]) {
-				case "Recipe:": cb.recipeName = stream[1]; break;
-				case "Cuisine:": cb.cuisine = stream[1]; break;
-				case "Dish:": cb.dish = stream[1]; break;
-				case "DishType:": cb.dishType = stream[1]; break;
+				switch (stream[0]) {
+				case "Recipe:":
+					cb.recipeName = stream[1];
+					break;
+				case "Cuisine:":
+					cb.cuisine = stream[1];
+					break;
+				case "Dish:":
+					cb.dish = stream[1];
+					break;
+				case "DishType:":
+					cb.dishType = stream[1];
+					break;
 				case "Ingredients:":
 					ArrayList<String> ingResults = new ArrayList<String>();
 					ArrayList<String> ingTypesResults = new ArrayList<String>();
@@ -123,21 +132,30 @@ public class Importer {
 					cb.ingredients = ingResults;
 					cb.ingredientsTypes = ingTypesResults;
 					break;
-				case "Utensil:": cb.utensil = stream[1]; break;
-				case "Steps:": 
+				case "Utensil:":
+					cb.utensil = stream[1];
+					break;
+				case "Steps:":
 					ArrayList<String> stepsResult = new ArrayList<String>();
 					for (int i = 1; i < stream.length; i++) {
 						stepsResult.add(stream[i]);
 					}
 					cb.steps = stepsResult;
 					break;
-				case "Diet:": cb.diet = stream[1]; break;
-				case "Calories:": cb.calories = stream[1]; break;
-				case "---": cbs.add(cb); cb = new CookBookEntry(); break;
+				case "Diet:":
+					cb.diet = stream[1];
+					break;
+				case "Calories:":
+					cb.calories = stream[1];
+					break;
+				case "---":
+					cbs.add(cb);
+					cb = new CookBookEntry();
+					break;
 				}
 				line = in.readLine();
 			}
-		}catch(FileNotFoundException e) {
+		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 			return null;
 		} catch (IOException e) {
@@ -146,7 +164,7 @@ public class Importer {
 		}
 		return cbs;
 	}
-	
+
 	class CookBookEntry {
 		String recipeName;
 		String cuisine;
@@ -158,8 +176,8 @@ public class Importer {
 		ArrayList<String> steps;
 		String diet;
 		String calories;
-		
-		CookBookEntry(){
+
+		CookBookEntry() {
 		}
-	}	
+	}
 }
