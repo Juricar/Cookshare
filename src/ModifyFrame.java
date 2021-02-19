@@ -45,7 +45,7 @@ public class ModifyFrame {
 		JPanel panel = new JPanel();
 		
 		for(int i = 0; i < this.fieldNames.size(); i++) {
-			if(!((this.fieldNames.get(i).equals("RecipeName") && this.tableToModify.equals("Has")) || this.fieldNames.get(i).equals("ID") || this.fieldNames.get(i).equals("UserID") 
+			if(!((this.fieldNames.get(i).equals("RecipeName") && (this.tableToModify.equals("Has") || this.tableToModify.equals("Uses"))) || this.fieldNames.get(i).equals("ID") || this.fieldNames.get(i).equals("UserID") 
 					|| this.fieldNames.get(i).equals("Username") || this.fieldNames.get(i).equals("Author") 
 					|| ((tableToModify.equals("Steps")|| tableToModify.equals("Reviews") || tableToModify.equals("Has")) && this.fieldNames.get(i).equals("RecipeID"))
 					|| (tableToModify.equals("Recipe") && this.fieldNames.get(i).equals("Name")))) {
@@ -81,16 +81,13 @@ public class ModifyFrame {
 //							questionMarkIndex++;
 //						}
 //						break;
-//					
-//					case "Dish":
-//						cs = con.prepareCall("{? = call addDish(?,?, ?)}");
-//						cs.registerOutParameter(1, Types.INTEGER);
-//						for(int i = 0; i < inputs.size(); i++) {
-//							cs.setString(questionMarkIndex, inputs.get(i).getText());
-//							questionMarkIndex++;
-//						}
-//						break;
-//					
+					case "Uses":
+						cs = con.prepareCall("{? = call modifyUses(?,?,?)}");
+						cs.registerOutParameter(1, Types.INTEGER);
+						cs.setString(2, table.getValueAt(table.getSelectedRow(), 0).toString());
+						cs.setString(3, table.getValueAt(table.getSelectedRow(), 1).toString());
+						cs.setString(4, sanitize(inputs.get(0).getText()));
+						break;
 					case "Has":
 						if(!uf.checkInTable("Ingredients", String.valueOf(inputs.get(0).getText())))
 						{

@@ -40,7 +40,7 @@ public class AddFrame {
 		JPanel panel = new JPanel();
 		
 		for(int i = 0; i < this.fieldNames.size(); i++) {
-			if(!((this.fieldNames.get(i).equals("RecipeName") && this.tableToAddTo.equals("Has")) || this.fieldNames.get(i).equals("ID") || this.fieldNames.get(i).equals("UserID") 
+			if(!((this.fieldNames.get(i).equals("RecipeName") && (this.tableToAddTo.equals("Has") || this.tableToAddTo.equals("Uses"))) || this.fieldNames.get(i).equals("ID") || this.fieldNames.get(i).equals("UserID") 
 					|| this.fieldNames.get(i).equals("Username") || this.fieldNames.get(i).equals("Author") 
 					|| ((tableToAddTo.equals("Steps")|| tableToAddTo.equals("Reviews") || tableToAddTo.equals("Uses") || tableToAddTo.equals("Ingredients")) 
 							&& this.fieldNames.get(i).equals("RecipeID")))) {

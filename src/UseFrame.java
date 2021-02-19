@@ -222,7 +222,7 @@ public class UseFrame {
 							listeners.add(new ActionListener() {
 								public void actionPerformed (ActionEvent e) {
 									filterTables("Utensils", "RecipeID", table.getValueAt(table.getSelectedRow(), 0).toString());
-									selectionMenu.setSelectedIndex(10);
+									selectionMenu.setSelectedIndex(9);
 									frameToDispose.dispose();
 								}
 							});
@@ -232,7 +232,7 @@ public class UseFrame {
 										addFrame("Uses");
 										frameToDispose.dispose();
 									} else {
-										JOptionPane.showMessageDialog(null, "You can't add ingredients to another user's recipe!");
+										JOptionPane.showMessageDialog(null, "You can't add utensils to another user's recipe!");
 									}
 								}
 							});
@@ -243,12 +243,14 @@ public class UseFrame {
 							listeners.add(new ActionListener() {
 								public void actionPerformed (ActionEvent e){
 									searchTables("Recipe", table.getValueAt(table.getSelectedRow(), 0).toString(), (String) sortMenu.getSelectedItem());
+									selectionMenu.setSelectedIndex(5);
 									frameToDispose.dispose();
 								}
 							});
 							listeners.add(new ActionListener() {
 								public void actionPerformed (ActionEvent e){
 									searchTables("Recipe", table.getValueAt(table.getSelectedRow(), 2).toString(), (String) sortMenu.getSelectedItem());
+									selectionMenu.setSelectedIndex(5);
 									frameToDispose.dispose();
 								}
 							});
@@ -258,6 +260,7 @@ public class UseFrame {
 							listeners.add(new ActionListener() {
 								public void actionPerformed (ActionEvent e){
 									filterTables("Recipe", "User", table.getValueAt(table.getSelectedRow(), 0).toString());
+									selectionMenu.setSelectedIndex(5);
 									frameToDispose.dispose();
 								}
 							});
@@ -310,6 +313,15 @@ public class UseFrame {
 									modifyFrame("Has", 0);
 								}
 							});
+							break;
+						case "Uses":
+							names.add("Edit utensils used");
+							listeners.add(new ActionListener() {
+								public void actionPerformed (ActionEvent e) {
+									modifyFrame("Uses", 0);
+								}
+							});
+							break;
 					}
 					contextMenu(names, listeners);
 				}
@@ -526,7 +538,7 @@ public class UseFrame {
 		@Override
 		public void actionPerformed(ActionEvent arg0) {
 			tableToAddTo = String.valueOf(selectionMenu.getSelectedItem());
-			if(tableToAddTo.equals("Steps") || tableToAddTo.equals("Reviews") || tableToAddTo.equals("Ingredients") || tableToAddTo.equals("Has"))
+			if(tableToAddTo.equals("Steps") || tableToAddTo.equals("Reviews") || tableToAddTo.equals("Ingredients") || tableToAddTo.equals("Has") || tableToAddTo.equals("Uses"))
 			{
 				JOptionPane.showMessageDialog(null, "You must add " + tableToAddTo.toLowerCase() + " through the recipe view");
 			}
