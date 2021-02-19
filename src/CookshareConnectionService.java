@@ -52,8 +52,8 @@ public class CookshareConnectionService {
 	private JTextField userBox;
 	private JTextField passBox;
 	JScrollPane scrollPane;
-	String user = "juricar";
-	String pass = "Atsknktvegef24035526LCA!";
+	String user = "Chef123";
+	String pass = "ICookFood";
 	protected String dbUsername;
 	private String dbPassword;
 	
