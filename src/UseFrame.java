@@ -439,8 +439,9 @@ public class UseFrame {
 		}
 	}
 	
-	public void setupFields(String table)
+	public ArrayList<String> setupFields(String table)
 	{
+		ArrayList<String> names = new ArrayList<String>();
 		try {
 			CallableStatement cs = con.prepareCall("{call search(?,?,?)}");
 			cs.setString(1, table);
@@ -450,9 +451,7 @@ public class UseFrame {
 			ResultSet rs = cs.getResultSet();
 			ResultSetMetaData rsmd = rs.getMetaData();
 			
-			ArrayList<String> names = new ArrayList<String>();
 			int columnCount = rsmd.getColumnCount();
-			numFields = columnCount;
 		
 			for(int i = 0; i < columnCount; i++) {
 				if(rsmd.getColumnName(i+1).equals("DishID"))
@@ -469,19 +468,18 @@ public class UseFrame {
 				}
 			}
 			if(table.equals("Dish")) names.add("Cuisine Type");
-			fieldNames = names;
 			if(table.equals("Ingredients")) names.add("RecipeID");
-			fieldNames = names;
 		} catch (SQLException e) {
-			JOptionPane.showMessageDialog(null, "Something went wrong");
+			JOptionPane.showMessageDialog(null, "Something went wrong with setting up the fields");
 		}
+		return names;
 	}
 	
 	public void modifyFrame(String tableToModify, int IDToModify)
 	{
-		setupFields(tableToModify);
+		ArrayList<String> fnames = setupFields(tableToModify);
 		inputs.clear();
-		ModifyFrame frame = new ModifyFrame(this.dbUsername, this.con, this.fieldNames, tableToModify, new ArrayList<JTextField>(), this.table, IDToModify);
+		ModifyFrame frame = new ModifyFrame(this.dbUsername, this.con, fnames, tableToModify, new ArrayList<JTextField>(), this.table, IDToModify, this);
 		frame.open();
 	}
 	
@@ -492,9 +490,9 @@ public class UseFrame {
 	
 	public void addFrame(String tableToAddTo) 
 	{
-		setupFields(tableToAddTo);
+		ArrayList<String> fnames = setupFields(tableToAddTo);
 		inputs.clear();
-		AddFrame frame = new AddFrame(this.dbUsername, this.con, this.fieldNames, tableToAddTo, new ArrayList<JTextField>(), this.table, this);
+		AddFrame frame = new AddFrame(this.dbUsername, this.con, fnames, tableToAddTo, new ArrayList<JTextField>(), this.table, this);
 		frame.open();
 	}
 	
@@ -528,7 +526,7 @@ public class UseFrame {
 		@Override
 		public void actionPerformed(ActionEvent arg0) {
 			tableToAddTo = String.valueOf(selectionMenu.getSelectedItem());
-			if(tableToAddTo.equals("Steps") || tableToAddTo.equals("Reviews") || tableToAddTo.equals("Ingredients"))
+			if(tableToAddTo.equals("Steps") || tableToAddTo.equals("Reviews") || tableToAddTo.equals("Ingredients") || tableToAddTo.equals("Has"))
 			{
 				JOptionPane.showMessageDialog(null, "You must add " + tableToAddTo.toLowerCase() + " through the recipe view");
 			}
@@ -542,6 +540,47 @@ public class UseFrame {
 
 		}
 
+	}
+	
+	public boolean checkInTable(String tableName, String entry) {
+		try
+		{
+			CallableStatement cs = con.prepareCall("{? = call checkInTable(?,?)}");
+			int result;
+			cs.registerOutParameter(1, Types.INTEGER);
+			cs.setString(2, tableName);
+			cs.setString(3, entry);
+			cs.execute();
+			result = cs.getInt(1);
+			System.out.println(String.valueOf(result));
+			return (result == 0);
+		}
+		catch(SQLException e)
+		{
+			JOptionPane.showMessageDialog(null, "Something went wrong");
+		}
+		return true;
+	}
+	
+	public int getRecipeID(String recipeName)
+	{
+		CallableStatement cs;
+		int recipeID = 0;
+		try{
+			cs = con.prepareCall("{? = call getRecipeID(?)}");
+			cs.registerOutParameter(1, Types.VARCHAR);
+			cs.setString(2, recipeName);
+			cs.execute();
+			ResultSet rs = cs.getResultSet();
+			ResultSetMetaData rsmd = rs.getMetaData();
+			rs.next();
+			recipeID = Integer.parseInt(String.valueOf(rs.getObject("ID")));
+		}
+		catch(SQLException e)
+		{
+			JOptionPane.showMessageDialog(null, "Something went wrong getting the recipe ID");
+		}
+		return recipeID;
 	}
 	
 }

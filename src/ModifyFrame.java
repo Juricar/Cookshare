@@ -23,8 +23,9 @@ public class ModifyFrame {
 	ArrayList<JTextField> inputs;
 	JTable table;
 	int IDToModify;
+	UseFrame uf;
 	
-	public ModifyFrame(String username, Connection receivedConnection, ArrayList<String> fields, String correctTable, ArrayList<JTextField> correctInputs, JTable table2, int IDToModify) {
+	public ModifyFrame(String username, Connection receivedConnection, ArrayList<String> fields, String correctTable, ArrayList<JTextField> correctInputs, JTable table2, int IDToModify, UseFrame uf) {
 		this.dbUsername = username;
 		this.con = receivedConnection;
 		this.fieldNames = fields;
@@ -32,6 +33,7 @@ public class ModifyFrame {
 		this.inputs = correctInputs;
 		this.table = table2;
 		this.IDToModify = IDToModify;
+		this.uf = uf;
 	}
 	/*
 	 This is just the AddFrame's code copied over.  Need to change this eventually. 
@@ -43,7 +45,7 @@ public class ModifyFrame {
 		JPanel panel = new JPanel();
 		
 		for(int i = 0; i < this.fieldNames.size(); i++) {
-			if(!(this.fieldNames.get(i).equals("ID") || this.fieldNames.get(i).equals("UserID") 
+			if(!((this.fieldNames.get(i).equals("RecipeName") && this.tableToModify.equals("Has")) || this.fieldNames.get(i).equals("ID") || this.fieldNames.get(i).equals("UserID") 
 					|| this.fieldNames.get(i).equals("Username") || this.fieldNames.get(i).equals("Author") 
 					|| ((tableToModify.equals("Steps")|| tableToModify.equals("Reviews") || tableToModify.equals("Has")) && this.fieldNames.get(i).equals("RecipeID"))
 					|| (tableToModify.equals("Recipe") && this.fieldNames.get(i).equals("Name")))) {
@@ -90,12 +92,17 @@ public class ModifyFrame {
 //						break;
 //					
 					case "Has":
+						if(!uf.checkInTable("Ingredients", String.valueOf(inputs.get(0).getText())))
+						{
+							uf.addFrame("Ingredients");
+							return;
+						}
 						cs = con.prepareCall("{? = call modifyHas(?,?,?,?)}");
 						cs.registerOutParameter(1, Types.INTEGER);
 						cs.setString(2, table.getValueAt(table.getSelectedRow(), 0).toString());
 						cs.setString(3, table.getValueAt(table.getSelectedRow(), 1).toString());
 						cs.setString(4, sanitize(inputs.get(0).getText()));
-						cs.setInt(5, Integer.parseInt(inputs.get(1).getText()));
+						cs.setString(5, sanitize(inputs.get(1).getText()));
 						break;
 					
 					case "Recipe":
@@ -168,7 +175,8 @@ public class ModifyFrame {
 //				System.out.println("Adding Dish complete!");
 				adderFrame.dispose();
 			} catch (SQLException e) {
-				JOptionPane.showMessageDialog(null, "Something went wrong");
+				JOptionPane.showMessageDialog(null, "Something went wrong with the modify button click");
+				e.printStackTrace();
 			}
 			
 		}
