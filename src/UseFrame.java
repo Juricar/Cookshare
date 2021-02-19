@@ -242,6 +242,7 @@ public class UseFrame {
 							names.add("View Recipes by Dish Type");
 							listeners.add(new ActionListener() {
 								public void actionPerformed (ActionEvent e){
+									System.out.println(table.getValueAt(table.getSelectedRow(), 0).toString());
 									searchTables("Recipe", table.getValueAt(table.getSelectedRow(), 0).toString(), (String) sortMenu.getSelectedItem());
 									selectionMenu.setSelectedIndex(5);
 									frameToDispose.dispose();
@@ -389,9 +390,7 @@ public class UseFrame {
 		int columnCount;
 		try {
 			columnCount = rsmd.getColumnCount();
-		
-			numFields = columnCount;
-		
+			
 			DefaultTableModel model = (DefaultTableModel) table.getModel();
 			model.setColumnCount(0);
 			model.setRowCount(0);
@@ -409,7 +408,7 @@ public class UseFrame {
 				model.addRow(data);
 			}
 			
-			scrollPane.getViewport ().add (table);
+			scrollPane.getViewport().add(table);
 		}
 		catch (SQLException e) {
 			JOptionPane.showMessageDialog(null, "Something went wrong");
